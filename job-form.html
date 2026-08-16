@@ -113,10 +113,14 @@ const MONTHS_BM = ['Jan','Feb','Mac','Apr','Mei','Jun','Jul','Ogos','Sep','Okt',
 function fmtDateTime(iso){
   const d = new Date(iso);
   if(isNaN(d)) return iso;
-  const h = d.getHours(), m = String(d.getMinutes()).padStart(2,'0');
+  // Malaysia is a fixed UTC+8 offset (no DST) — shift explicitly rather than relying on
+  // getHours()/getDate(), which use whatever timezone the viewing device happens to be
+  // set to. Keeps this correct even if a phone's timezone setting is wrong.
+  const my = new Date(d.getTime() + 8*60*60*1000);
+  const h = my.getUTCHours(), m = String(my.getUTCMinutes()).padStart(2,'0');
   const h12 = ((h % 12) || 12);
   const ampm = h < 12 ? 'AM' : 'PM';
-  return d.getDate() + ' ' + MONTHS_BM[d.getMonth()] + ' ' + d.getFullYear() + ', ' + h12 + ':' + m + ' ' + ampm;
+  return my.getUTCDate() + ' ' + MONTHS_BM[my.getUTCMonth()] + ' ' + my.getUTCFullYear() + ', ' + h12 + ':' + m + ' ' + ampm;
 }
 
 // Converts an ISO timestamp to the "YYYY-MM-DDTHH:mm" format <input type="datetime-local">
