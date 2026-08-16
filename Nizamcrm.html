@@ -1,0 +1,2041 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Nizam Service & Repair</title>
+<style>
+  :root{
+    --ink:#152623;
+    --ink-soft:#4b615c;
+    --bg:#F5F3EC;
+    --panel:#FFFFFF;
+    --line:#DCE0D6;
+    --teal:#0E4F4A;
+    --teal-deep:#0A3A37;
+    --teal-tint:#E4EFEC;
+    --amber:#D98B2B;
+    --amber-tint:#FBEBD4;
+    --ok:#2F7D4F;
+    --ok-tint:#E3F2E6;
+    --warn:#C77E1B;
+    --warn-tint:#FBEBD4;
+    --active:#1D6FA5;
+    --active-tint:#E1EEF7;
+    --bad:#B4392E;
+    --bad-tint:#F8E3E0;
+    --radius:10px;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html{ touch-action:pan-x pan-y; }
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    padding-bottom:76px;
+    overscroll-behavior-y:contain;
+  }
+  h1,h2,h3{
+    font-family:'Georgia',Cambria,serif;
+    font-weight:700;
+    margin:0;
+    letter-spacing:-0.01em;
+  }
+  .topbar{
+    background:#EAF3F1;
+    color:var(--teal-deep);
+    padding:14px 18px;
+    position:sticky;
+    top:0;
+    z-index:20;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    border-bottom:2px solid var(--teal-tint);
+  }
+  .topbar .brand{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    min-width:0;
+  }
+  .topbar .brand .drop{ font-size:22px; }
+  .drop-badge{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:60px;
+    height:60px;
+    flex-shrink:0;
+  }
+  .drop-badge img{
+    width:60px;
+    height:60px;
+    display:block;
+  }
+  .topbar h1{ font-size:17px; line-height:1.2; color:var(--teal-deep); }
+  .lang-toggle{
+    display:flex;
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:20px;
+    padding:3px;
+    flex-shrink:0;
+  }
+  .lang-btn{
+    border:none;
+    background:transparent;
+    color:var(--ink-soft);
+    font-size:11.5px;
+    font-weight:700;
+    padding:5px 10px;
+    border-radius:16px;
+    cursor:pointer;
+    letter-spacing:.02em;
+  }
+  .lang-btn.active{ background:var(--teal); color:#fff; }
+  .wrap{
+    max-width:720px;
+    margin:0 auto;
+    padding:14px 14px 0;
+  }
+  .stat-row{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:10px;
+    margin:0 0 16px;
+  }
+  .stat-card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:12px 14px;
+    cursor:pointer;
+    box-shadow:0 1px 2px rgba(20,40,35,.04);
+  }
+  .stat-card:active{ background:var(--teal-tint); }
+  .filter-chip{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    background:var(--teal-tint);
+    color:var(--teal-deep);
+    font-size:12px;
+    font-weight:600;
+    padding:6px 10px;
+    border-radius:20px;
+    margin-bottom:10px;
+  }
+  .filter-chip button{
+    background:none;
+    border:none;
+    color:var(--teal-deep);
+    font-size:14px;
+    font-weight:700;
+    cursor:pointer;
+    padding:0;
+    line-height:1;
+  }
+  .stat-card .num{
+    font-family:Georgia,serif;
+    font-size:24px;
+    font-weight:700;
+    color:var(--teal-deep);
+    line-height:1.1;
+  }
+  .stat-card .lbl{
+    font-size:11px;
+    color:var(--ink-soft);
+    text-transform:uppercase;
+    letter-spacing:.04em;
+    margin-top:4px;
+  }
+  .stat-card.alert .num{ color:var(--bad); }
+  .section-title{
+    font-size:13px;
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    color:var(--ink-soft);
+    margin:22px 2px 10px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .section-title::after{ content:''; flex:1; height:1px; background:var(--line); }
+  .card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:14px;
+    margin-bottom:10px;
+    box-shadow:0 1px 2px rgba(20,40,35,.04);
+  }
+  .row{ display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
+  .name{ font-weight:600; font-size:15px; }
+  .cust-code{ font-weight:500; color:#6b7a75; font-size:13px; }
+  .sub{ font-size:12.5px; color:var(--ink-soft); margin-top:2px; }
+  .badge{
+    font-size:10.5px;
+    font-weight:600;
+    padding:3px 8px;
+    border-radius:20px;
+    white-space:nowrap;
+    text-transform:uppercase;
+    letter-spacing:.02em;
+  }
+  .badge.ok{ background:var(--ok-tint); color:var(--ok); }
+  .badge.warn{ background:var(--warn-tint); color:var(--warn); }
+  .badge.active{ background:var(--active-tint); color:var(--active); }
+  .badge.bad{ background:var(--bad-tint); color:var(--bad); }
+  .badge.neutral{ background:var(--teal-tint); color:var(--teal-deep); }
+  .btn{
+    border:none;
+    border-radius:8px;
+    padding:10px 14px;
+    font-size:13.5px;
+    font-weight:600;
+    cursor:pointer;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+  }
+  .btn-primary{ background:var(--teal); color:#fff; }
+  .btn-amber{ background:var(--amber); color:#fff; }
+  .btn-whatsapp{ background:#25D366; color:#fff; }
+  .btn-ghost{ background:transparent; color:var(--teal-deep); border:1px solid var(--line); }
+  .btn-block{ width:100%; justify-content:center; }
+  .btn-sm{ padding:6px 10px; font-size:12px; }
+  .btn-danger{ background:var(--bad-tint); color:var(--bad); }
+  .actions{ display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; }
+  .fab{
+    position:fixed;
+    bottom:70px;
+    right:16px;
+    width:52px;
+    height:52px;
+    border-radius:50%;
+    background:var(--amber);
+    color:#fff;
+    border:none;
+    box-shadow:0 4px 14px rgba(0,0,0,.25);
+    cursor:pointer;
+    z-index:25;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:0;
+  }
+  .tabbar{
+    position:fixed;
+    bottom:0; left:0; right:0;
+    background:var(--panel);
+    border-top:1px solid var(--line);
+    display:flex;
+    z-index:30;
+  }
+  .tab{
+    flex:1;
+    text-align:center;
+    padding:9px 0 8px;
+    font-size:10.5px;
+    color:var(--ink-soft);
+    cursor:pointer;
+    text-transform:uppercase;
+    letter-spacing:.03em;
+    font-weight:600;
+  }
+  .tab .ic{ display:flex; justify-content:center; margin-bottom:3px; }
+  .tab.active .ic svg{ stroke-width:2; }
+  .tab.active{ color:var(--teal); }
+  .view{ display:none; }
+  .view.active{ display:block; }
+  .empty{ text-align:center; padding:36px 16px; color:var(--ink-soft); }
+  .empty .big{
+    width:56px; height:56px;
+    display:flex; align-items:center; justify-content:center;
+    margin:0 auto 10px;
+    border-radius:50%;
+    background:var(--teal-tint);
+    color:var(--teal);
+  }
+  input,select,textarea{
+    width:100%;
+    padding:11px 12px;
+    border:1px solid var(--line);
+    border-radius:8px;
+    font-size:16px;
+    background:#fff;
+    color:var(--ink);
+    font-family:inherit;
+    line-height:1.3;
+  }
+  select{
+    appearance:none; -webkit-appearance:none; -moz-appearance:none;
+    padding-right:34px;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%234b615c' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+    background-repeat:no-repeat;
+    background-position:right 12px center;
+  }
+  label{
+    font-size:12px;
+    font-weight:600;
+    color:var(--ink-soft);
+    text-transform:uppercase;
+    letter-spacing:.03em;
+    display:block;
+    margin:12px 0 5px;
+  }
+  label:first-child{ margin-top:0; }
+  .search{ margin-bottom:12px; }
+  .checkbox-row{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    text-transform:none;
+    letter-spacing:normal;
+    font-weight:500;
+    color:var(--ink);
+    font-size:14px;
+  }
+  .checkbox-row input{ width:auto; }
+  .modal-overlay{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(10,20,18,.5);
+    z-index:50;
+    align-items:flex-end;
+  }
+  .modal-overlay.open{ display:flex; }
+  .modal{
+    background:var(--bg);
+    width:100%;
+    max-height:88vh;
+    overflow-y:auto;
+    border-radius:16px 16px 0 0;
+    padding:18px 16px 24px;
+  }
+  .modal h2{ font-size:18px; color:var(--teal-deep); margin-bottom:4px; }
+  .modal-close{
+    position:absolute;
+    top:14px; right:16px;
+    background:none;
+    border:none;
+    font-size:22px;
+    color:var(--ink-soft);
+    cursor:pointer;
+  }
+  .modal-inner{ position:relative; }
+  .two-col{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .footer-actions{ display:flex; gap:8px; margin:18px 2px 8px; }
+  .logo-row{ display:flex; align-items:center; gap:12px; margin-bottom:4px; }
+  .logo-preview{
+    width:56px; height:56px;
+    border-radius:8px;
+    border:1px dashed var(--line);
+    background:#fff;
+    display:flex; align-items:center; justify-content:center;
+    overflow:hidden;
+    flex-shrink:0;
+  }
+  .logo-preview img{ width:100%; height:100%; object-fit:contain; }
+  .lock-overlay{
+    position:fixed; inset:0; z-index:9999;
+    background:var(--bg);
+    display:flex; align-items:center; justify-content:center; flex-direction:column;
+    padding:24px;
+  }
+  .lock-overlay.hidden{ display:none; }
+  .lock-inner{ width:100%; max-width:300px; text-align:center; }
+  .lock-logo img{ width:60px; height:60px; margin-bottom:14px; }
+  .lock-title{ font-family:Georgia,serif; font-weight:700; font-size:18px; color:var(--teal-deep); margin-bottom:28px; }
+  .lock-dots{ display:flex; justify-content:center; gap:16px; margin-bottom:34px; }
+  .lock-dot{
+    width:14px; height:14px; border-radius:50%; background:var(--bg);
+    box-shadow: inset 2px 2px 4px #C9C6BC, inset -2px -2px 4px #FFFFFF;
+    transition: all .12s;
+  }
+  .lock-dot.filled{ background:var(--teal-deep); box-shadow:none; }
+  .lock-dot.error{ background:var(--bad); box-shadow:none; }
+  @keyframes lockshake{ 0%,100%{transform:translateX(0);} 20%,60%{transform:translateX(-8px);} 40%,80%{transform:translateX(8px);} }
+  .lock-dots.shake{ animation:lockshake .4s; }
+  .lock-keypad{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  .lock-keypad button{
+    aspect-ratio:1;
+    border-radius:50%;
+    border:none;
+    background:var(--bg);
+    font-size:22px;
+    font-weight:600;
+    color:var(--ink);
+    cursor:pointer;
+    box-shadow: 6px 6px 12px #DAD7CD, -6px -6px 12px #FFFFFF;
+    transition: box-shadow .1s;
+  }
+  .lock-keypad button:active{
+    box-shadow: inset 4px 4px 8px #DAD7CD, inset -4px -4px 8px #FFFFFF;
+  }
+  .lock-keypad .lock-empty{ visibility:hidden; }
+
+  /* Desktop/laptop: keep the fixed tab bar and FAB aligned under the same centered content column instead of spanning the full browser window */
+  @media (min-width:768px){
+    .tabbar{
+      left:50%;
+      right:auto;
+      transform:translateX(-50%);
+      width:720px;
+      max-width:100%;
+      box-shadow:0 0 0 1px var(--line);
+    }
+    .fab{
+      right:calc(50% - 360px + 16px);
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="lock-overlay" id="lockOverlay">
+  <div class="lock-inner">
+    <div class="lock-logo"><img id="lockLogoImg" alt=""></div>
+    <div class="lock-title" data-t="lock.title"></div>
+    <div class="lock-dots" id="lockDots">
+      <span class="lock-dot"></span><span class="lock-dot"></span><span class="lock-dot"></span><span class="lock-dot"></span>
+    </div>
+    <div class="lock-keypad">
+      <button onclick="pressPinDigit('1')">1</button>
+      <button onclick="pressPinDigit('2')">2</button>
+      <button onclick="pressPinDigit('3')">3</button>
+      <button onclick="pressPinDigit('4')">4</button>
+      <button onclick="pressPinDigit('5')">5</button>
+      <button onclick="pressPinDigit('6')">6</button>
+      <button onclick="pressPinDigit('7')">7</button>
+      <button onclick="pressPinDigit('8')">8</button>
+      <button onclick="pressPinDigit('9')">9</button>
+      <div class="lock-empty"></div>
+      <button onclick="pressPinDigit('0')">0</button>
+      <button onclick="backspacePin()">⌫</button>
+    </div>
+  </div>
+</div>
+
+
+<div class="topbar">
+  <div class="brand"><span class="drop-badge"><img src="data:image/png;base64,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" alt="Logo"></span><h1>Nizam Service &amp; Repair</h1></div>
+  <div class="lang-toggle">
+    <button class="lang-btn" id="langBtnMs" onclick="setLang('ms')">BM</button>
+    <button class="lang-btn" id="langBtnEn" onclick="setLang('en')">EN</button>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- DASHBOARD -->
+  <div class="view active" id="view-dashboard">
+    <div class="stat-row">
+      <div class="stat-card" onclick="showOpenJobs()"><div class="num" id="statPending">0</div><div class="lbl" data-t="stat.pending"></div></div>
+      <div class="stat-card alert" onclick="showDueCustomers()"><div class="num" id="statDue">0</div><div class="lbl" data-t="stat.due"></div></div>
+      <div class="stat-card" onclick="showMonthJobs()"><div class="num" id="statRevenue">RM0</div><div class="lbl" data-t="stat.revenue"></div></div>
+      <div class="stat-card" onclick="showMonthJobs()"><div class="num" id="statProfit">RM0</div><div class="lbl" data-t="stat.profit"></div></div>
+    </div>
+
+    <div class="section-title" data-t="section.attention"></div>
+    <div id="attentionList"></div>
+
+    <div class="section-title" data-t="section.recent"></div>
+    <div id="recentJobs"></div>
+  </div>
+
+  <!-- JOBS -->
+  <div class="view" id="view-jobs">
+    <div id="jobFilterChip"></div>
+    <input class="search" id="jobSearch" data-t-ph="search.jobs">
+    <div id="jobsList"></div>
+  </div>
+
+  <!-- CUSTOMERS -->
+  <div class="view" id="view-customers">
+    <input class="search" id="custSearch" data-t-ph="search.customers">
+    <div id="customersList"></div>
+  </div>
+
+  <!-- TECHNICIANS -->
+  <div class="view" id="view-technicians">
+    <div id="techList"></div>
+  </div>
+
+  <!-- SETTINGS / BACKUP -->
+  <div class="view" id="view-settings">
+    <div class="card">
+      <div class="name" data-t="report.title"></div>
+      <div class="sub" data-t="report.desc"></div>
+      <label data-t="report.month"></label>
+      <input type="month" id="reportMonth" onchange="renderFinancialReport()">
+      <div id="reportResults" style="margin-top:10px;"></div>
+    </div>
+    <div class="card">
+      <div class="name" data-t="sync.title"></div>
+      <div class="sub" data-t="sync.desc"></div>
+      <div class="actions"><button class="btn btn-primary" onclick="syncNow()" id="syncBtnEl"><span data-t="sync.btn"></span></button></div>
+      <div class="sub" id="syncStatus" style="margin-top:8px;"></div>
+    </div>
+    <div class="card">
+      <div class="name" data-t="settings.backupTitle"></div>
+      <div class="sub" data-t="settings.backupDesc"></div>
+      <div class="actions"><button class="btn btn-primary" onclick="exportData()" id="exportBtnEl"><span id="exportBtnIcon"></span><span data-t="settings.exportBtn"></span></button></div>
+    </div>
+    <div class="card">
+      <div class="name" data-t="settings.restoreTitle"></div>
+      <div class="sub" data-t="settings.restoreDesc"></div>
+      <input type="file" id="importFile" accept=".json" style="margin-top:10px;">
+      <div class="actions"><button class="btn btn-amber" onclick="importData()" id="restoreBtnEl"><span id="restoreBtnIcon"></span><span data-t="settings.restoreBtn"></span></button></div>
+    </div>
+    <div class="card">
+      <div class="name" data-t="settings.intervalTitle"></div>
+      <div class="sub" data-t="settings.intervalDesc"></div>
+      <label data-t="settings.intervalLabel"></label>
+      <input type="number" id="defaultInterval" min="1" max="24">
+      <div class="actions"><button class="btn btn-ghost" onclick="saveInterval()" data-t="settings.saveBtn"></button></div>
+    </div>
+    <div class="card">
+      <div class="name" data-t="settings.pinTitle"></div>
+      <div class="sub" data-t="settings.pinDesc"></div>
+      <label data-t="settings.pinCurrent"></label>
+      <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" id="pinCurrent">
+      <label data-t="settings.pinNew"></label>
+      <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" id="pinNew">
+      <label data-t="settings.pinConfirm"></label>
+      <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" id="pinConfirm">
+      <div class="actions"><button class="btn btn-ghost" onclick="changePin()" data-t="settings.saveBtn"></button></div>
+    </div>
+    <div class="card">
+      <div class="name" data-t="settings.businessTitle"></div>
+      <div class="sub" data-t="settings.businessDesc"></div>
+      <label data-t="settings.bizLogo"></label>
+      <div class="logo-row">
+        <div class="logo-preview" id="bizLogoPreview"></div>
+        <div>
+          <input type="file" id="bizLogoFile" accept="image/*" onchange="handleLogoUpload(event)">
+          <button class="btn btn-danger btn-sm" id="bizLogoRemove" onclick="removeLogo()" style="display:none;margin-top:6px;" data-t="settings.bizLogoRemove"></button>
+        </div>
+      </div>
+      <label data-t="settings.bizName"></label>
+      <input id="bizName">
+      <label data-t="settings.bizPhone"></label>
+      <input id="bizPhone">
+      <label data-t="settings.bizAddress"></label>
+      <textarea id="bizAddress" rows="2"></textarea>
+      <label data-t="settings.bizPayment"></label>
+      <textarea id="bizPayment" rows="2"></textarea>
+      <label data-t="settings.bizQr"></label>
+      <div class="logo-row">
+        <div class="logo-preview" id="bizQrPreview"></div>
+        <div>
+          <input type="file" id="bizQrFile" accept="image/*" onchange="handleQrUpload(event)">
+          <button class="btn btn-danger btn-sm" id="bizQrRemove" onclick="removeQr()" style="display:none;margin-top:6px;" data-t="settings.bizQrRemove"></button>
+        </div>
+      </div>
+      <div class="actions"><button class="btn btn-ghost" onclick="saveBusiness()" data-t="settings.saveBtn"></button></div>
+    </div>
+  </div>
+
+</div>
+
+<button class="fab" id="fabBtn" onclick="handleFab()"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+
+<div class="tabbar">
+  <div class="tab active" data-tab="dashboard" onclick="switchTab('dashboard')"><span class="ic"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11.5L12 4l8 7.5"/><path d="M6 10v10h12V10"/><path d="M10 20v-6h4v6"/></svg></span><span data-t="tab.home"></span></div>
+  <div class="tab" data-tab="jobs" onclick="switchTab('jobs')"><span class="ic"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4.5" width="14" height="16" rx="2"/><path d="M9 4.5h6v2.2H9z"/><path d="M9 13l2 2 4-4.3"/></svg></span><span data-t="tab.jobs"></span></div>
+  <div class="tab" data-tab="customers" onclick="switchTab('customers')"><span class="ic"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9.5" cy="8.5" r="3"/><path d="M4 20c0-3.3 2.5-5.5 5.5-5.5S15 16.7 15 20"/><circle cx="17.3" cy="9.5" r="2.2"/><path d="M15.5 20c.2-2.3 1.6-4 3.7-4.4"/></svg></span><span data-t="tab.customers"></span></div>
+  <div class="tab" data-tab="technicians" onclick="switchTab('technicians')"><span class="ic"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 00-5.4 5.4L4 17l3 3 5.3-5.3a4 4 0 005.4-5.4l-2.6 2.6-2-2 2.6-2.6z"/></svg></span><span data-t="tab.techs"></span></div>
+  <div class="tab" data-tab="settings" onclick="switchTab('settings')"><span class="ic"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 13.5a1.7 1.7 0 000-3l1-1.7-1.7-1.7-1.7 1a1.7 1.7 0 00-3-.1l-.2-2h-2.4l-.2 2a1.7 1.7 0 00-3 .1l-1.7-1L4.9 8.8l1 1.7a1.7 1.7 0 000 3l-1 1.7 1.7 1.7 1.7-1a1.7 1.7 0 003 .1l.2 2h2.4l.2-2a1.7 1.7 0 003-.1l1.7 1 1.7-1.7z"/></svg></span><span data-t="tab.more"></span></div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal"><div class="modal-inner" id="modalInner"></div></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const STORE_KEY = 'aquaops_data_v1';
+// Fixed platform fee deducted per completed job, in addition to the technician's own
+// commission. Permanent by design — not exposed as a settings field.
+const PLATFORM_FEE_PER_JOB = 3;
+const LANG_KEY = 'aquaops_lang';
+let DB = load();
+let LANG = localStorage.getItem(LANG_KEY) || 'ms';
+
+/* ---------- CLOUD SYNC (Supabase) ----------
+   Connects this app to the same Supabase project the technician app (Nizamtech.html) uses.
+   Syncs automatically every 30s while the app is open (plus whenever the tab/app regains
+   focus), and can also be triggered manually via the "Sync now" button in Settings. The app
+   still works fully offline in between — a sync just reconciles whatever changed since the
+   last run.
+*/
+const SB_URL = 'https://jtlmhmlbehdaerwoqivu.supabase.co';
+const SB_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp0bG1obWxiZWhkYWVyd29xaXZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUxODc2MzIsImV4cCI6MjEwMDc2MzYzMn0.z2HK2acnYQh-3OzUS3pe74X9TC8nBt9L3eCpki2pnaM';
+const sbCloud = (window.supabase && window.supabase.createClient) ? window.supabase.createClient(SB_URL, SB_ANON_KEY) : null;
+const LAST_SYNC_KEY = 'aquaops_last_sync';
+
+function setSyncStatus(msg){
+  const el = document.getElementById('syncStatus');
+  if(el) el.textContent = msg;
+}
+function refreshSyncStatusLabel(){
+  const last = localStorage.getItem(LAST_SYNC_KEY);
+  setSyncStatus(last ? (t('sync.lastSynced') + new Date(last).toLocaleString()) : t('sync.never'));
+}
+
+let syncInFlight = false;
+let lastSyncErrors = [];
+async function syncNow(){
+  if(!sbCloud){ setSyncStatus(t('sync.unavailable')); return; }
+  if(syncInFlight) return;
+  syncInFlight = true;
+  lastSyncErrors = [];
+  const btn = document.getElementById('syncBtnEl');
+  if(btn) btn.disabled = true;
+  setSyncStatus(t('sync.inProgress'));
+  try{
+    await pullTechnicians();
+    await pushCustomers();
+    await pushJobs();
+    await pullJobStatuses();
+    save();
+    renderAll();
+    const now = new Date();
+    localStorage.setItem(LAST_SYNC_KEY, now.toISOString());
+    if(lastSyncErrors.length){
+      // Surface real sync errors instead of the silent swallow that used to happen here —
+      // this is what made "sync this job first" persist forever with no explanation.
+      setSyncStatus(t('sync.lastSynced') + now.toLocaleString() + ' — ' + lastSyncErrors.length + ' error(s): ' + lastSyncErrors.join(' | '));
+    }else{
+      setSyncStatus(t('sync.lastSynced') + now.toLocaleString());
+    }
+  }catch(e){
+    setSyncStatus(t('sync.failed'));
+  }
+  if(btn) btn.disabled = false;
+  syncInFlight = false;
+}
+
+const AUTO_SYNC_MS = 15000;
+if(sbCloud){
+  setInterval(function(){ syncNow(); }, AUTO_SYNC_MS);
+  document.addEventListener('visibilitychange', function(){
+    if(document.visibilityState === 'visible') syncNow();
+  });
+}
+
+// Pulls technicians who've registered on their own phone (Nizamtech.html) into the local
+// technician list, matching an existing local entry by phone number where possible so a
+// technician's commission/area/skills set here aren't lost.
+async function pullTechnicians(){
+  const { data, error } = await sbCloud.rpc('list_technicians');
+  if(error){ console.error('pullTechnicians failed', error); lastSyncErrors.push('pullTechnicians: '+(error.message||JSON.stringify(error))); return; }
+  if(!data) return;
+  data.forEach(function(rt){
+    let local = DB.technicians.find(function(x){ return x.supabaseId===rt.id; });
+    if(!local){
+      local = DB.technicians.find(function(x){
+        return !x.supabaseId && x.phone && rt.phone && x.phone.replace(/[^0-9]/g,'')===rt.phone.replace(/[^0-9]/g,'');
+      });
+    }
+    if(local){
+      const wasLinked = !!local.supabaseId;
+      local.supabaseId = rt.id;
+      local.name = rt.name;
+      local.phone = rt.phone;
+      if(!local.area && rt.coverage_area) local.area = rt.coverage_area;
+      if(!local.skills && rt.skills) local.skills = rt.skills;
+      // This technician just registered (wasn't linked before) — any job already assigned
+      // to them locally was pushed as "unassigned" up to now, since Supabase had no matching
+      // technician row to attach it to. Flag those jobs so the next push actually links them,
+      // which is what makes a technician start receiving jobs the moment they register.
+      if(!wasLinked){
+        DB.jobs.forEach(function(j){ if(j.techId===local.id) j._dirty = true; });
+      }
+    } else {
+      DB.technicians.push({
+        id: nextId(), supabaseId: rt.id, name: rt.name, phone: rt.phone,
+        area: rt.coverage_area||'', skills: rt.skills||'',
+        commType: rt.commission_type||'percent', rate: rt.commission_value||0
+      });
+    }
+  });
+}
+
+// Pushes new/changed customers up so jobs assigned to a technician carry real customer info.
+async function pushCustomers(){
+  for(const c of DB.customers){
+    if(c.supabaseId && !c._dirty) continue;
+    const { data, error } = await sbCloud.rpc('upsert_customer', {
+      p_id: c.supabaseId || null, p_name: c.name, p_phone: c.phone||null,
+      p_address: c.address||null, p_area: c.area||null, p_brand: c.brand||null,
+      p_model: c.model||null, p_last_service_date: c.lastService||null,
+      p_recurring: c.recurring!==false, p_notes: c.notes||null
+    });
+    if(!error && data){ c.supabaseId = data; delete c._dirty; }
+    else if(error){
+      console.error('pushCustomers failed for', c.name, error);
+      lastSyncErrors.push('Customer "'+c.name+'": '+(error.message||JSON.stringify(error)));
+    }
+  }
+}
+
+// Pushes new/changed jobs up, including the assigned technician (if that technician has
+// synced/registered — see pullTechnicians). A job assigned to a technician who hasn't
+// registered yet is pushed as unassigned until they do.
+async function pushJobs(){
+  for(const j of DB.jobs){
+    if(j.supabaseId && !j._dirty) continue;
+    const c = DB.customers.find(function(x){return x.id===j.custId;});
+    if(!c || !c.supabaseId){
+      // This is the exact case that produces "sync this job first" even after a sync
+      // ran: the job's own customer never got a supabaseId (usually because pushing
+      // that customer errored above), so the job is skipped on every pass, silently,
+      // forever — until now, when that error actually gets surfaced.
+      if(c) lastSyncErrors.push('Job for "'+c.name+'" skipped: customer has not synced yet.');
+      continue;
+    }
+    const tc = DB.technicians.find(function(x){return x.id===j.techId;});
+    const { data, error } = await sbCloud.rpc('upsert_job', {
+      p_id: j.supabaseId || null, p_customer_id: c.supabaseId,
+      p_technician_id: (tc && tc.supabaseId) || null,
+      p_job_date: j.date, p_status: j.status, p_amount: j.amount||0,
+      p_notes: j.notes||null, p_invoice_no: j.invoiceNo||null,
+      p_tech_commission: jobTechCommission(j)
+    });
+    if(!error && data){ j.supabaseId = data; delete j._dirty; }
+    else if(error){
+      console.error('pushJobs failed for job of', c.name, error);
+      lastSyncErrors.push('Job for "'+c.name+'": '+(error.message||JSON.stringify(error)));
+    }
+  }
+}
+
+// Pulls back the status a technician has set on their phone — starting a job ("in progress")
+// and marking it done, including what they logged as done/changed — and reflects it on the
+// matching local job. Admin-set statuses (new/assigned/cancelled) are left alone here; only
+// the technician-driven states flow back in.
+async function pullJobStatuses(){
+  const { data, error } = await sbCloud.rpc('list_jobs');
+  if(error){ console.error('pullJobStatuses failed', error); lastSyncErrors.push('pullJobStatuses: '+(error.message||JSON.stringify(error))); return; }
+  if(!data) return;
+  const techDriven = { in_progress:true, done:true };
+  data.forEach(function(rj){
+    const local = DB.jobs.find(function(x){ return x.supabaseId===rj.id; });
+    if(!local) return;
+    if(typeof rj.tech_commission === 'number') local.techComm = rj.tech_commission;
+    // Appointment can be set/changed by the technician any time before the form locks
+    // (independent of status), so this isn't gated by techDriven/status like the rest.
+    if(rj.appointment_at !== undefined && rj.appointment_at !== local.appointmentAt) local.appointmentAt = rj.appointment_at;
+    if(techDriven[rj.status] && rj.status !== local.status){
+      local.status = rj.status;
+      if(rj.status === 'done'){
+        local.completedNotes = rj.completed_notes || '';
+        local.completedAt = rj.completed_at || '';
+        // job-form.html lets the technician correct the final amount on-site (e.g. extra
+        // parts needed); pick that up too so the invoice reflects what was actually charged.
+        if(typeof rj.amount === 'number' && rj.amount !== local.amount) local.amount = rj.amount;
+        const c = DB.customers.find(function(x){return x.id===local.custId;});
+        if(c) c.lastService = local.date;
+      }
+    }
+  });
+}
+
+const TR = {
+  ms: {
+    'stat.pending':'Job terbuka', 'stat.due':'Akan tamat 7 hari', 'stat.revenue':'Kasar (bulan ini)', 'stat.profit':'Bersih (bulan ini)',
+    'section.attention':'Perlu perhatian', 'section.recent':'Job terkini',
+    'search.jobs':'Cari job ikut pelanggan atau juruteknik...', 'search.customers':'Cari pelanggan ikut kod, nama, telefon, kawasan...',
+    'report.title':'Laporan kewangan bulanan', 'report.desc':'Semak untung kasar dan untung bersih bagi bulan pilihan.', 'report.month':'Pilih bulan', 'report.jobsCompleted':'Job selesai', 'report.revenue':'Jumlah kutipan', 'report.techPayouts':'Bayaran juruteknik', 'report.grossProfit':'Untung kasar', 'report.systemFees':'Yuran sistem', 'report.netProfit':'Untung bersih',
+    'sync.title':'Segerak dengan juruteknik', 'sync.desc':'Segerak automatik setiap 15 saat semasa app dibuka. Tarik senarai juruteknik berdaftar, hantar job/pelanggan ke cloud, dan tarik status job.', 'sync.btn':'Segerak sekarang',
+    'sync.unavailable':'Segerakan tidak tersedia', 'sync.inProgress':'Sedang menyegerakkan…', 'sync.failed':'Segerakan gagal — cuba lagi', 'sync.lastSynced':'Segerakan terakhir: ', 'sync.never':'Belum pernah disegerakkan',
+    'settings.backupTitle':'Sandaran data', 'settings.backupDesc':'Semua data disimpan hanya pada peranti ini. Eksport sandaran secara berkala, terutamanya sebelum tukar telefon.', 'settings.exportBtn':'Eksport sandaran (.json)',
+    'settings.restoreTitle':'Pulihkan sandaran', 'settings.restoreDesc':'Ini akan menggantikan semua data semasa pada peranti ini dengan fail sandaran.', 'settings.restoreBtn':'Pulihkan sandaran',
+    'settings.intervalTitle':'Tempoh servis lalai', 'settings.intervalDesc':'Digunakan sebagai cadangan untuk pelanggan baharu — setiap pelanggan boleh ditetapkan secara berasingan dalam borang pelanggan.', 'settings.intervalLabel':'Bulan antara servis', 'settings.saveBtn':'Simpan',
+    'settings.pinTitle':'PIN keselamatan', 'settings.pinDesc':'Lindungi app ini dengan PIN 4-digit. PIN lalai: 0000.', 'settings.pinCurrent':'PIN semasa', 'settings.pinNew':'PIN baharu (4 digit)', 'settings.pinConfirm':'Sahkan PIN baharu', 'settings.pinWrong':'PIN semasa salah.', 'settings.pinInvalid':'PIN mesti 4 digit angka.', 'settings.pinMismatch':'PIN baharu tidak sepadan.', 'settings.pinSaved':'PIN telah dikemaskini.', 'lock.title':'Masukkan PIN',
+    'tab.home':'Utama', 'tab.jobs':'Job', 'tab.customers':'Pelanggan', 'tab.techs':'Juruteknik', 'tab.more':'Lagi',
+    'cust.editTitle':'Kemaskini pelanggan', 'cust.addTitle':'Tambah pelanggan', 'cust.code':'Kod pelanggan', 'cust.name':'Nama', 'cust.phone':'Telefon',
+    'cust.area':'Kawasan / Negeri', 'cust.address':'Alamat penuh', 'cust.addressPh':'Untuk rujukan juruteknik semasa servis', 'cust.brand':'Kategori perkhidmatan',
+    'cust.model':'Item / Model (pilihan)', 'cust.lastService':'Tarikh servis terakhir',
+    'cust.recurring':'Perkhidmatan berulang (ingatkan servis akan datang)', 'cust.interval':'Selang servis (bulan)', 'cust.oneOff':'Servis sekali sahaja',
+    'cust.issueInvoice':'Jana invois', 'cust.issueInvoiceDescPh':'cth: Servis penapis air, tukar cartridge',
+    'cust.notes':'Nota', 'cust.save':'Simpan pelanggan', 'cust.delete':'Padam pelanggan', 'cust.confirmDelete':'Padam pelanggan ini? Job berkaitan akan kekal tetapi kehilangan pautan.',
+    'cust.nameRequired':'Nama diperlukan', 'cust.noHistory':'Tiada rekod servis', 'cust.overdue':'Tertunggak — ', 'cust.dueSoon':'Akan tamat: ', 'cust.upcoming':'Servis akan datang: ',
+    'cust.emptyTitle':'Belum ada pelanggan', 'cust.emptySub':'Tambah pelanggan klien anda apabila lead masuk.',
+    'tech.editTitle':'Kemaskini juruteknik', 'tech.addTitle':'Tambah juruteknik', 'tech.name':'Nama', 'tech.phone':'Telefon (untuk hantar WhatsApp)',
+    'tech.area':'Kawasan liputan', 'tech.areaPh':'cth: Shah Alam, Klang', 'tech.skills':'Kepakaran / Skill',
+    'tech.rate':'Komisen lalai setiap job (RM)', 'tech.ratePh':'cth: 40', 'tech.save':'Simpan juruteknik', 'tech.delete':'Padam juruteknik', 'tech.confirmDelete':'Padam juruteknik ini?',
+    'tech.nameRequired':'Nama diperlukan', 'tech.jobsDone':' job selesai', 'tech.emptyTitle':'Belum ada juruteknik', 'tech.emptySub':'Tambah juruteknik yang klien anda hantar job kepada.',
+    'job.editTitle':'Kemaskini job', 'job.addTitle':'Job baharu', 'job.customer':'Pelanggan', 'job.technician':'Juruteknik', 'job.techCommission':'Komisen juruteknik untuk job ini (RM)', 'job.techCommissionPh':'cth: 50', 'job.unassigned':'Belum ditugaskan',
+    'job.date':'Tarikh servis', 'job.status':'Status', 'job.new':'Baharu', 'job.assigned':'Ditugaskan', 'job.inProgress':'Sedang berjalan', 'job.done':'Selesai', 'job.cancelled':'Dibatalkan',
+    'job.amount':'Jumlah dikenakan kepada pelanggan (RM)', 'job.notes':'Nota', 'job.completedNotes':'Dilaporkan oleh juruteknik', 'job.appointment':'Temujanji (ditetapkan oleh juruteknik)', 'job.save':'Simpan job', 'job.sendWhatsapp':'Hantar kepada juruteknik melalui WhatsApp', 'job.needSyncFirst':'Sync job ini dahulu sebelum hantar link laporan.',
+    'jf.sendLink':'Hantar link laporan kerja', 'jf.msg':'Sila isi laporan kerja selepas siap, tekan Hantar:',
+    'job.delete':'Padam job', 'job.confirmDelete':'Padam job ini?', 'job.needCustomer':'Tambah pelanggan dahulu.', 'job.amountRequired':'Sila masukkan jumlah yang sah.', 'job.needTechPhone':'Tetapkan juruteknik dengan nombor telefon dahulu.',
+    'job.emptyTitle':'Belum ada job', 'job.emptySub':'Tekan + untuk cipta job dan tugaskan juruteknik.', 'job.emptySubDash':'Cipta job pertama anda dari tab Job.',
+    'job.deletedCustomer':'(pelanggan dipadam)', 'job.charged':' dikenakan · ', 'job.forTech':' untuk juruteknik · ', 'job.platformFee':' yuran sistem · ', 'job.forYou':' untuk anda',
+    'wa.title':'Job baharu ditugaskan:', 'wa.customer':'Pelanggan: ', 'wa.phone':'Telefon: ', 'wa.area':'Kawasan: ', 'wa.address':'Alamat: ', 'wa.brand':'Kategori: ', 'wa.date':'Tarikh: ', 'wa.amount':'Jumlah: ', 'wa.notes':'Nota: ',
+    'dash.allClear':'Semua dah kemas kini — tiada yang tertunggak atau akan tamat.',
+    'settings.saved':'Disimpan.', 'settings.chooseFile':'Pilih fail sandaran dahulu.', 'settings.confirmRestore':'Ini akan menggantikan semua data semasa. Teruskan?',
+    'settings.restored':'Sandaran berjaya dipulihkan.', 'settings.badFile':'Fail tidak boleh dibaca.', 'settings.exportPrefix':'aquaops-sandaran-',
+    'filter.open':'Menapis: Job terbuka', 'filter.month':'Menapis: Selesai bulan ini', 'filter.clear':'✕ Kosongkan',
+    'field.choose':'-- Pilih --', 'field.other':'Lain-lain', 'field.specify':'Nyatakan', 'field.specifyPh':'Taip di sini...', 'wa.chatBtn':'Hubungi melalui WhatsApp',
+    'settings.businessTitle':'Maklumat perniagaan', 'settings.businessDesc':'Dipaparkan pada invois yang dijana.',
+    'settings.bizName':'Nama perniagaan', 'settings.bizPhone':'Telefon', 'settings.bizAddress':'Alamat',
+    'settings.bizPayment':'Maklumat pembayaran (bank / e-wallet)', 'settings.bizLogo':'Logo perniagaan', 'settings.bizLogoRemove':'Buang logo',
+    'settings.bizQr':'Kod QR pembayaran (pilihan)', 'settings.bizQrRemove':'Buang kod QR', 'settings.imgTooLarge':'Fail terlalu besar. Sila muat naik imej di bawah {max}.',
+    'job.generateInvoice':'Jana invois', 'inv.title':'INVOIS', 'inv.no':'No. Invois', 'inv.date':'Tarikh',
+    'inv.billTo':'Bil kepada', 'inv.desc':'Perkara', 'inv.amount':'Jumlah', 'inv.total':'Jumlah Keseluruhan',
+    'inv.serviceLine':'Servis & pembaikan', 'inv.thankyou':'Terima kasih atas perniagaan anda.',
+    'inv.paymentInfo':'Maklumat pembayaran', 'inv.qrScan':'Imbas untuk bayar', 'inv.sendWhatsapp':'Hantar melalui WhatsApp', 'inv.downloaded':'Invois telah dimuat turun ke peranti anda.', 'inv.genError':'Gagal jana invois. Sila cuba lagi.', 'inv.noPhoneForShare':'Tiada nombor telefon pelanggan untuk berkongsi.', 'inv.attachReminder':'(Fail PDF invois telah dimuat turun — sila lampirkan secara manual jika perlu.)'
+  },
+  en: {
+    'stat.pending':'Open jobs', 'stat.due':'Due within 7 days', 'stat.revenue':'Kasar / gross (this month)', 'stat.profit':'Bersih / net (this month)',
+    'section.attention':'Needs attention', 'section.recent':'Recent jobs',
+    'search.jobs':'Search jobs by customer or technician...', 'search.customers':'Search customers by code, name, phone, area...',
+    'report.title':'Monthly financial report', 'report.desc':'Check gross profit and net profit for the selected month.', 'report.month':'Select month', 'report.jobsCompleted':'Jobs completed', 'report.revenue':'Total revenue', 'report.techPayouts':'Technician payouts', 'report.grossProfit':'Gross profit', 'report.systemFees':'System fees', 'report.netProfit':'Net profit',
+    'sync.title':'Sync with technicians', 'sync.desc':'Syncs automatically every 15 seconds while the app is open. Pulls in registered technicians, pushes jobs/customers to the cloud, and pulls back job status.', 'sync.btn':'Sync now',
+    'sync.unavailable':'Sync unavailable', 'sync.inProgress':'Syncing…', 'sync.failed':'Sync failed — try again', 'sync.lastSynced':'Last synced: ', 'sync.never':'Never synced yet',
+    'settings.backupTitle':'Backup data', 'settings.backupDesc':'All data is stored only on this device. Export a backup regularly, especially before switching phones.', 'settings.exportBtn':'Export backup (.json)',
+    'settings.restoreTitle':'Restore backup', 'settings.restoreDesc':'This will replace all current data on this device with the backup file.', 'settings.restoreBtn':'Restore backup',
+    'settings.intervalTitle':'Default service interval', 'settings.intervalDesc':'Used as the starting suggestion for new customers — each customer can be set individually in their own form.', 'settings.intervalLabel':'Months between services', 'settings.saveBtn':'Save',
+    'settings.pinTitle':'Security PIN', 'settings.pinDesc':'Protect this app with a 4-digit PIN. Default PIN: 0000.', 'settings.pinCurrent':'Current PIN', 'settings.pinNew':'New PIN (4 digits)', 'settings.pinConfirm':'Confirm new PIN', 'settings.pinWrong':'Current PIN is incorrect.', 'settings.pinInvalid':'PIN must be 4 digits.', 'settings.pinMismatch':'New PIN does not match.', 'settings.pinSaved':'PIN updated.', 'lock.title':'Enter PIN',
+    'tab.home':'Home', 'tab.jobs':'Jobs', 'tab.customers':'Customers', 'tab.techs':'Techs', 'tab.more':'More',
+    'cust.editTitle':'Edit customer', 'cust.addTitle':'Add customer', 'cust.code':'Customer code', 'cust.name':'Name', 'cust.phone':'Phone',
+    'cust.area':'Area / State', 'cust.address':'Full address', 'cust.addressPh':'For technician reference during service', 'cust.brand':'Service category',
+    'cust.model':'Item / Model (optional)', 'cust.lastService':'Last service date',
+    'cust.recurring':'Recurring service (remind me for next service)', 'cust.interval':'Service interval (months)', 'cust.oneOff':'One-off service',
+    'cust.issueInvoice':'Issue invoice', 'cust.issueInvoiceDescPh':'e.g. Water filter service, cartridge change',
+    'cust.notes':'Notes', 'cust.save':'Save customer', 'cust.delete':'Delete customer', 'cust.confirmDelete':'Delete this customer? Related jobs will stay but lose the link.',
+    'cust.nameRequired':'Name is required', 'cust.noHistory':'No service history', 'cust.overdue':'Overdue — ', 'cust.dueSoon':'Due soon: ', 'cust.upcoming':'Upcoming service: ',
+    'cust.emptyTitle':'No customers yet', 'cust.emptySub':'Add your client\u2019s customers as leads come in.',
+    'tech.editTitle':'Edit technician', 'tech.addTitle':'Add technician', 'tech.name':'Name', 'tech.phone':'Phone (for WhatsApp dispatch)',
+    'tech.area':'Coverage area', 'tech.areaPh':'e.g. Shah Alam, Klang', 'tech.skills':'Skills',
+    'tech.rate':'Default commission per job (RM)', 'tech.ratePh':'e.g. 40', 'tech.save':'Save technician', 'tech.delete':'Delete technician', 'tech.confirmDelete':'Delete this technician?',
+    'tech.nameRequired':'Name is required', 'tech.jobsDone':' jobs completed', 'tech.emptyTitle':'No technicians yet', 'tech.emptySub':'Add the technicians your client dispatches jobs to.',
+    'job.editTitle':'Edit job', 'job.addTitle':'New job', 'job.customer':'Customer', 'job.technician':'Technician', 'job.techCommission':'Technician commission for this job (RM)', 'job.techCommissionPh':'e.g. 50', 'job.unassigned':'Unassigned',
+    'job.date':'Service date', 'job.status':'Status', 'job.new':'New', 'job.assigned':'Assigned', 'job.inProgress':'In progress', 'job.done':'Done', 'job.cancelled':'Cancelled',
+    'job.amount':'Amount charged to customer (RM)', 'job.notes':'Notes', 'job.completedNotes':'Reported by technician', 'job.appointment':'Appointment (set by technician)', 'job.save':'Save job', 'job.sendWhatsapp':'Send to technician via WhatsApp', 'job.needSyncFirst':'Sync this job first before sending the report link.',
+    'jf.sendLink':'Send job report link', 'jf.msg':'Please fill in the job report once done, then tap Send:',
+    'job.delete':'Delete job', 'job.confirmDelete':'Delete this job?', 'job.needCustomer':'Add a customer first.', 'job.amountRequired':'Please enter a valid amount.', 'job.needTechPhone':'Assign a technician with a phone number first.',
+    'job.emptyTitle':'No jobs yet', 'job.emptySub':'Tap + to create a job and assign a technician.', 'job.emptySubDash':'Create your first job from the Jobs tab.',
+    'job.deletedCustomer':'(deleted customer)', 'job.charged':' charged · ', 'job.forTech':' for technician · ', 'job.platformFee':' system fee · ', 'job.forYou':' for you',
+    'wa.title':'New job assigned:', 'wa.customer':'Customer: ', 'wa.phone':'Phone: ', 'wa.area':'Area: ', 'wa.address':'Address: ', 'wa.brand':'Category: ', 'wa.date':'Date: ', 'wa.amount':'Amount: ', 'wa.notes':'Notes: ',
+    'dash.allClear':'All caught up — nothing overdue or due soon.',
+    'settings.saved':'Saved.', 'settings.chooseFile':'Choose a backup file first.', 'settings.confirmRestore':'This will replace all current data. Continue?',
+    'settings.restored':'Backup restored.', 'settings.badFile':'Could not read that file.', 'settings.exportPrefix':'aquaops-backup-',
+    'filter.open':'Filtering: Open jobs', 'filter.month':'Filtering: Done this month', 'filter.clear':'✕ Clear',
+    'field.choose':'-- Select --', 'field.other':'Other', 'field.specify':'Specify', 'field.specifyPh':'Type here...', 'wa.chatBtn':'Chat via WhatsApp',
+    'settings.businessTitle':'Business info', 'settings.businessDesc':'Shown on generated invoices.',
+    'settings.bizName':'Business name', 'settings.bizPhone':'Phone', 'settings.bizAddress':'Address',
+    'settings.bizPayment':'Payment info (bank / e-wallet)', 'settings.bizLogo':'Business logo', 'settings.bizLogoRemove':'Remove logo',
+    'settings.bizQr':'Payment QR code (optional)', 'settings.bizQrRemove':'Remove QR code', 'settings.imgTooLarge':'File too large. Please upload an image under {max}.',
+    'job.generateInvoice':'Generate invoice', 'inv.title':'INVOICE', 'inv.no':'Invoice No.', 'inv.date':'Date',
+    'inv.billTo':'Bill To', 'inv.desc':'Description', 'inv.amount':'Amount', 'inv.total':'Total',
+    'inv.serviceLine':'Service & repair', 'inv.thankyou':'Thank you for your business.',
+    'inv.paymentInfo':'Payment info', 'inv.qrScan':'Scan to pay', 'inv.sendWhatsapp':'Send via WhatsApp', 'inv.downloaded':'Invoice downloaded to your device.', 'inv.genError':'Failed to generate invoice. Please try again.', 'inv.noPhoneForShare':'No customer phone number to share with.', 'inv.attachReminder':'(Invoice PDF was downloaded — please attach it manually if needed.)'
+  }
+};
+const ICON = {
+  plus: '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
+  droplet: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5C12 2.5 5.5 10.8 5.5 15.3a6.5 6.5 0 0013 0c0-4.5-6.5-12.8-6.5-12.8z"/></svg>',
+  home: '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11.5L12 4l8 7.5"/><path d="M6 10v10h12V10"/><path d="M10 20v-6h4v6"/></svg>',
+  jobs: '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4.5" width="14" height="16" rx="2"/><path d="M9 4.5h6v2.2H9z"/><path d="M9 13l2 2 4-4.3"/></svg>',
+  users: '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9.5" cy="8.5" r="3"/><path d="M4 20c0-3.3 2.5-5.5 5.5-5.5S15 16.7 15 20"/><circle cx="17.3" cy="9.5" r="2.2"/><path d="M15.5 20c.2-2.3 1.6-4 3.7-4.4"/></svg>',
+  wrench: '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 00-5.4 5.4L4 17l3 3 5.3-5.3a4 4 0 005.4-5.4l-2.6 2.6-2-2 2.6-2.6z"/></svg>',
+  settings: '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 13.5a1.7 1.7 0 000-3l1-1.7-1.7-1.7-1.7 1a1.7 1.7 0 00-3-.1l-.2-2h-2.4l-.2 2a1.7 1.7 0 00-3 .1l-1.7-1L4.9 8.8l1 1.7a1.7 1.7 0 000 3l-1 1.7 1.7 1.7 1.7-1a1.7 1.7 0 003 .1l.2 2h2.4l.2-2a1.7 1.7 0 003-.1l1.7 1 1.7-1.7z"/></svg>',
+  check: '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12.3l2.6 2.6L16 9.3"/></svg>',
+  clipboard: '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4h6v2H9z"/><path d="M9 12h6"/><path d="M9 16h6"/></svg>',
+  userplus: '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="8" r="3.2"/><path d="M4 20c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5"/><path d="M19 8v4"/><path d="M17 10h4"/></svg>',
+  download: '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v11"/><path d="M7.5 10l4.5 4.5L16.5 10"/><path d="M5 20h14"/></svg>',
+  upload: '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V9"/><path d="M7.5 13L12 8.5 16.5 13"/><path d="M5 4h14"/></svg>',
+  whatsapp: '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 2.2a9.8 9.8 0 00-8.4 14.8L2.2 21.8l4.9-1.3A9.8 9.8 0 1012 2.2zm5.6 14c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-1.6-.1-.4-.1-.9-.3-1.5-.6-2.6-1.1-4.3-3.8-4.5-4-.1-.2-1.1-1.4-1.1-2.7 0-1.2.6-1.8.9-2.1.2-.2.5-.3.7-.3h.5c.2 0 .4 0 .5.4.2.5.7 1.7.8 1.8.1.2.1.4 0 .6l-.3.5c-.1.2-.3.3-.4.5-.2.2-.3.4-.1.7.2.3.8 1.2 1.7 2 1.2 1 2.1 1.4 2.4 1.5.3.1.5.1.7-.1.2-.2.8-.9 1-1.2.2-.3.4-.2.7-.1.3.1 1.7.8 2 .9.3.2.5.2.6.4.1.1.1.7-.1 1.3z"/></svg>',
+  receipt: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-2.5-1.5L13 21l-2.5-1.5L8 21l-2-1.5z"/><path d="M9 8h6"/><path d="M9 12h6"/><path d="M9 16h3"/></svg>'
+};
+function t(k){ return (TR[LANG] && TR[LANG][k]) || k; }
+
+const CATEGORY_LIST = ['Water Dispenser/Penapis Air','Filter Outdoor','Aircond','CCTV','Peti Sejuk','Kipas Remote','Mesin Basuh','TV','Vacuum','Iron/Seterika'];
+// English display labels for the EN toggle — CATEGORY_LIST itself stays the stored
+// value (so existing customer records, technician skill-matching, and invoices are
+// unaffected); only the option text shown to the user changes with LANG.
+const CATEGORY_LABELS_EN = {
+  'Water Dispenser/Penapis Air':'Water Dispenser/Filter', 'Filter Outdoor':'Outdoor Filter',
+  'Aircond':'Air Conditioner', 'Peti Sejuk':'Refrigerator', 'Kipas Remote':'Remote Fan',
+  'Mesin Basuh':'Washing Machine', 'Iron/Seterika':'Iron'
+};
+function categoryLabel(cat){ return (LANG==='en' && CATEGORY_LABELS_EN[cat]) || cat; }
+function buildCategorySelect(selectId, wrapId, currentVal){
+  const isOther = !!(currentVal && CATEGORY_LIST.indexOf(currentVal)===-1);
+  let html = '<select id="'+selectId+'" onchange="toggleOther(\''+selectId+'\',\''+wrapId+'\')">';
+  html += '<option value=""'+(!currentVal?' selected':'')+'>'+t('field.choose')+'</option>';
+  CATEGORY_LIST.forEach(function(cat){
+    html += '<option value="'+esc(cat)+'"'+(currentVal===cat?' selected':'')+'>'+esc(categoryLabel(cat))+'</option>';
+  });
+  html += '<option value="Lain-lain"'+(isOther?' selected':'')+'>'+t('field.other')+'</option>';
+  html += '</select>';
+  html += '<div id="'+wrapId+'" style="display:'+(isOther?'block':'none')+'">';
+  html += '<label>'+t('field.specify')+'</label><input id="'+selectId+'Other" value="'+(isOther?esc(currentVal):'')+'" placeholder="'+t('field.specifyPh')+'">';
+  html += '</div>';
+  return html;
+}
+function toggleOther(selectId, wrapId){
+  const val = document.getElementById(selectId).value;
+  document.getElementById(wrapId).style.display = (val==='Lain-lain') ? 'block' : 'none';
+}
+function readCategoryValue(selectId){
+  const val = document.getElementById(selectId).value;
+  if(val==='Lain-lain'){
+    const other = document.getElementById(selectId+'Other').value.trim();
+    return other || 'Lain-lain';
+  }
+  return val;
+}
+
+
+function normalizeDB(db){
+  if(!db) db = { customers:[], technicians:[], jobs:[], settings:{}, seq:1 };
+  if(!db.customers) db.customers = [];
+  if(!db.technicians) db.technicians = [];
+  if(!db.jobs) db.jobs = [];
+  if(!db.settings) db.settings = {};
+  if(typeof db.settings.intervalMonths !== 'number') db.settings.intervalMonths = 3;
+  if(!db.settings.business) db.settings.business = {name:'',phone:'',address:'',payment:'',logo:'',qr:''};
+  if(typeof db.settings.business.logo !== 'string') db.settings.business.logo = '';
+  if(typeof db.settings.business.qr !== 'string') db.settings.business.qr = '';
+  if(typeof db.settings.pin !== 'string' || !/^\d{4}$/.test(db.settings.pin)) db.settings.pin = '0000';
+  if(typeof db.invSeq !== 'number') db.invSeq = 1;
+  if(typeof db.seq !== 'number') db.seq = 1;
+  if(typeof db.custSeq !== 'number') db.custSeq = 1;
+  db.customers.forEach(function(c){ if(typeof c.recurring !== 'boolean') c.recurring = true; });
+  db.technicians.forEach(function(tc){ tc.commType = 'fixed'; });
+  // Backfill customer codes for records saved before this feature existed.
+  // Assign in existing array order so earlier customers keep lower numbers.
+  db.customers.forEach(function(c){
+    if(!c.code){ c.code = String(db.custSeq).padStart(3,'0'); db.custSeq++; }
+  });
+  return db;
+}
+function load(){
+  let db = null;
+  try{
+    const raw = localStorage.getItem(STORE_KEY);
+    if(raw) db = JSON.parse(raw);
+  }catch(e){}
+  return normalizeDB(db);
+}
+function save(){ localStorage.setItem(STORE_KEY, JSON.stringify(DB)); }
+function nextId(){ return 'id' + (DB.seq++); }
+function nextCustCode(){ return String(DB.custSeq++).padStart(3,'0'); }
+function fmtMoney(n){ return 'RM' + (Math.round((n||0)*100)/100).toLocaleString('en-MY',{minimumFractionDigits:0}); }
+function todayISO(){ return new Date().toISOString().slice(0,10); }
+function daysBetween(a,b){ return Math.round((new Date(b) - new Date(a)) / 86400000); }
+function fmtDate(d){
+  if(!d) return '—';
+  const dt = new Date(d+'T00:00:00');
+  return dt.toLocaleDateString(LANG==='ms'?'ms-MY':'en-GB',{day:'numeric',month:'short',year:'numeric'});
+}
+function fmtDateTime(iso){
+  if(!iso) return '—';
+  const dt = new Date(iso);
+  if(isNaN(dt)) return '—';
+  return dt.toLocaleDateString(LANG==='ms'?'ms-MY':'en-GB',{day:'numeric',month:'short',year:'numeric'}) +
+    ', ' + dt.toLocaleTimeString(LANG==='ms'?'ms-MY':'en-GB',{hour:'2-digit',minute:'2-digit'});
+}
+
+/* ---------- LANGUAGE ---------- */
+function setLang(l){
+  LANG = l;
+  localStorage.setItem(LANG_KEY, l);
+  document.documentElement.lang = l;
+  applyStaticI18n();
+  renderAll();
+}
+function applyStaticI18n(){
+  document.getElementById('langBtnMs').classList.toggle('active', LANG==='ms');
+  document.getElementById('langBtnEn').classList.toggle('active', LANG==='en');
+  document.querySelectorAll('[data-t]').forEach(function(el){ el.textContent = t(el.getAttribute('data-t')); });
+  document.querySelectorAll('[data-t-ph]').forEach(function(el){ el.placeholder = t(el.getAttribute('data-t-ph')); });
+  document.getElementById('exportBtnIcon').innerHTML = ICON.download;
+  document.getElementById('restoreBtnIcon').innerHTML = ICON.upload;
+}
+
+/* ---------- TAB SWITCHING ---------- */
+let jobFilter = 'all';
+function switchTab(tab){
+  jobFilter = 'all';
+  switchTabRaw(tab);
+}
+function switchTabRaw(tab){
+  document.querySelectorAll('.view').forEach(function(v){ v.classList.remove('active'); });
+  document.querySelectorAll('.tab').forEach(function(el){ el.classList.remove('active'); });
+  document.getElementById('view-'+tab).classList.add('active');
+  document.querySelector('.tab[data-tab="'+tab+'"]').classList.add('active');
+  renderAll();
+}
+function showOpenJobs(){ jobFilter = 'open'; switchTabRaw('jobs'); }
+function showMonthJobs(){ jobFilter = 'month'; switchTabRaw('jobs'); }
+function showDueCustomers(){ switchTabRaw('customers'); }
+function clearJobFilter(){ jobFilter = 'all'; renderJobs(); }
+function handleFab(){
+  const active = document.querySelector('.tab.active').dataset.tab;
+  if(active==='customers') openCustomerForm();
+  else if(active==='technicians') openTechForm();
+  else openJobForm();
+}
+
+/* ---------- MODAL HELPERS ---------- */
+function openModal(html){
+  document.getElementById('modalInner').innerHTML = '<button class="modal-close" onclick="closeModal()">&times;</button>' + html;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+function closeModal(){ document.getElementById('modalOverlay').classList.remove('open'); }
+
+/* ---------- CUSTOMERS ---------- */
+function openCustomerForm(id){
+  const c = id ? DB.customers.find(function(x){return x.id===id;}) : null;
+  const isRecurring = c ? (c.recurring!==false) : false;
+  const html =
+    '<h2>' + (c?t('cust.editTitle'):t('cust.addTitle')) + '</h2>' +
+    (c?'<label>'+t('cust.code')+'</label><input value="'+esc(c.code||'')+'" disabled>':'') +
+    '<label>'+t('cust.name')+'</label><input id="cName" value="' + (c?esc(c.name):'') + '">' +
+    '<label>'+t('cust.phone')+'</label><input id="cPhone" value="' + (c?esc(c.phone):'') + '" placeholder="60123456789">' +
+    '<label>'+t('cust.address')+'</label><textarea id="cAddress" rows="2" placeholder="'+t('cust.addressPh')+'">' + (c&&c.address?esc(c.address):'') + '</textarea>' +
+    '<div class="two-col">' +
+      '<div><label>'+t('cust.area')+'</label><input id="cArea" value="' + (c?esc(c.area):'') + '"></div>' +
+      '<div><label>'+t('cust.brand')+'</label>'+buildCategorySelect('cBrand','cBrandOtherWrap', c?c.brand:'')+'</div>' +
+    '</div>' +
+    '<label>'+t('cust.model')+'</label><input id="cModel" value="' + (c&&c.model?esc(c.model):'') + '">' +
+    '<label>'+t('cust.lastService')+'</label><input type="date" id="cLastService" value="' + (c&&c.lastService?c.lastService:'') + '">' +
+    '<label class="checkbox-row"><input type="checkbox" id="cRecurring"' + (isRecurring?' checked':'') + '> ' + t('cust.recurring') + '</label>' +
+    '<label>'+t('cust.interval')+'</label><input type="number" id="cInterval" min="1" max="24" value="' + (c&&c.intervalMonths?c.intervalMonths:(DB.settings.intervalMonths||3)) + '">' +
+    '<label>'+t('cust.notes')+'</label><textarea id="cNotes" rows="2">' + (c&&c.notes?esc(c.notes):'') + '</textarea>' +
+    '<div class="footer-actions"><button class="btn btn-primary btn-block" onclick="saveCustomer(' + (c?"'"+c.id+"'":'null') + ')">'+t('cust.save')+'</button></div>' +
+    (c&&c.phone?'<div class="footer-actions"><button class="btn btn-whatsapp btn-block" onclick="openWhatsAppChat(\''+esc(c.phone)+'\')">'+ICON.whatsapp+' '+t('wa.chatBtn')+'</button></div>':'') +
+    (c?'<div class="footer-actions"><button class="btn btn-ghost btn-block" onclick="openIssueInvoiceForm(\''+c.id+'\')">'+ICON.receipt+' '+t('cust.issueInvoice')+'</button></div>':'') +
+    (c?'<div class="footer-actions"><button class="btn btn-danger btn-block" onclick="deleteCustomer(\''+c.id+'\')">'+t('cust.delete')+'</button></div>':'');
+  openModal(html);
+}
+function saveCustomer(id){
+  const name = document.getElementById('cName').value.trim();
+  if(!name){ alert(t('cust.nameRequired')); return; }
+  let intervalInput = parseInt(document.getElementById('cInterval').value);
+  if(isNaN(intervalInput)) intervalInput = DB.settings.intervalMonths||3;
+  if(intervalInput < 1) intervalInput = 1;
+  const data = {
+    name: name,
+    phone: document.getElementById('cPhone').value.trim(),
+    address: document.getElementById('cAddress').value.trim(),
+    area: document.getElementById('cArea').value.trim(),
+    brand: readCategoryValue('cBrand'),
+    model: document.getElementById('cModel').value.trim(),
+    lastService: document.getElementById('cLastService').value,
+    recurring: document.getElementById('cRecurring').checked,
+    intervalMonths: intervalInput,
+    notes: document.getElementById('cNotes').value.trim(),
+    _dirty: true
+  };
+  if(id){ Object.assign(DB.customers.find(function(x){return x.id===id;}), data); }
+  else { data.id = nextId(); data.code = nextCustCode(); DB.customers.push(data); }
+  save(); closeModal(); renderAll();
+}
+async function deleteCustomer(id){
+  if(!confirm(t('cust.confirmDelete'))) return;
+  const c = DB.customers.find(function(x){return x.id===id;});
+  DB.customers = DB.customers.filter(function(x){return x.id!==id;});
+  save(); closeModal(); renderAll();
+  // Best-effort: if this customer was ever synced, delete it in Supabase too so it
+  // doesn't keep living in the cloud after being removed here. If the device is
+  // offline this silently fails — there's no retry/queue for deletes yet, so an
+  // offline delete needs to be repeated once back online.
+  if(c && c.supabaseId){
+    try{ await sbCloud.rpc('delete_customer', { p_id: c.supabaseId }); }catch(e){}
+  }
+}
+function nextDueDate(c){
+  if(!c.recurring) return null;
+  if(!c.lastService) return null;
+  const d = new Date(c.lastService+'T00:00:00');
+  d.setMonth(d.getMonth() + (c.intervalMonths || DB.settings.intervalMonths || 3));
+  return d.toISOString().slice(0,10);
+}
+function dueStatus(c){
+  if(!c.recurring) return {label:t('cust.oneOff'), cls:'neutral'};
+  const due = nextDueDate(c);
+  if(!due) return {label:t('cust.noHistory'), cls:'neutral'};
+  const diff = daysBetween(todayISO(), due);
+  if(diff < 0) return {label:t('cust.overdue') + fmtDate(due), cls:'bad'};
+  if(diff <= 7) return {label:t('cust.dueSoon') + fmtDate(due), cls:'warn'};
+  return {label:t('cust.upcoming') + fmtDate(due), cls:'ok'};
+}
+function renderCustomers(){
+  const q = (document.getElementById('custSearch').value||'').toLowerCase();
+  const list = DB.customers
+    .filter(function(c){ return !q || c.name.toLowerCase().includes(q) || (c.phone||'').includes(q) || (c.area||'').toLowerCase().includes(q) || (c.code||'').toLowerCase().includes(q); })
+    .sort(function(a,b){
+      const da = nextDueDate(a) || '9999'; const db = nextDueDate(b) || '9999';
+      return da.localeCompare(db);
+    });
+  const el = document.getElementById('customersList');
+  if(list.length===0){ el.innerHTML = emptyState(ICON.userplus, t('cust.emptyTitle'), t('cust.emptySub')); return; }
+  el.innerHTML = list.map(function(c){
+    const st = dueStatus(c);
+    return '<div class="card" onclick="openCustomerForm(\''+c.id+'\')">' +
+      '<div class="row"><div>' +
+        '<div class="name">'+(c.code?'<span class="cust-code">#'+esc(c.code)+'</span> ':'')+esc(c.name)+'</div>' +
+        '<div class="sub">'+esc(c.brand||'')+' '+(c.model?'· '+esc(c.model):'')+' '+(c.area?'· '+esc(c.area):'')+'</div>' +
+        '<div class="sub">'+esc(c.phone||'')+'</div>' +
+      '</div><span class="badge '+st.cls+'">'+st.label+'</span></div></div>';
+  }).join('');
+}
+
+/* ---------- TECHNICIANS ---------- */
+function openTechForm(id){
+  const t2 = id ? DB.technicians.find(function(x){return x.id===id;}) : null;
+  const html =
+    '<h2>' + (t2?t('tech.editTitle'):t('tech.addTitle')) + '</h2>' +
+    '<label>'+t('tech.name')+'</label><input id="tName" value="' + (t2?esc(t2.name):'') + '">' +
+    '<label>'+t('tech.phone')+'</label><input id="tPhone" value="' + (t2?esc(t2.phone):'') + '" placeholder="60123456789">' +
+    '<label>'+t('tech.area')+'</label><input id="tArea" value="' + (t2?esc(t2.area):'') + '" placeholder="'+t('tech.areaPh')+'">' +
+    '<label>'+t('tech.skills')+'</label>'+buildCategorySelect('tSkills','tSkillsOtherWrap', t2?t2.skills:'') +
+    '<label>'+t('tech.rate')+'</label><input type="number" id="tRate" value="' + (t2?t2.rate:'') + '" placeholder="'+t('tech.ratePh')+'">' +
+    '<div class="footer-actions"><button class="btn btn-primary btn-block" onclick="saveTech(' + (t2?"'"+t2.id+"'":'null') + ')">'+t('tech.save')+'</button></div>' +
+    (t2&&t2.phone?'<div class="footer-actions"><button class="btn btn-whatsapp btn-block" onclick="openWhatsAppChat(\''+esc(t2.phone)+'\')">'+ICON.whatsapp+' '+t('wa.chatBtn')+'</button></div>':'') +
+    (t2?'<div class="footer-actions"><button class="btn btn-danger btn-block" onclick="deleteTech(\''+t2.id+'\')">'+t('tech.delete')+'</button></div>':'');
+  openModal(html);
+}
+function saveTech(id){
+  const name = document.getElementById('tName').value.trim();
+  if(!name){ alert(t('tech.nameRequired')); return; }
+  const data = {
+    name: name,
+    phone: document.getElementById('tPhone').value.trim(),
+    area: document.getElementById('tArea').value.trim(),
+    skills: readCategoryValue('tSkills'),
+    commType: 'fixed',
+    rate: parseFloat(document.getElementById('tRate').value)||0
+  };
+  let rec;
+  if(id){ rec = DB.technicians.find(function(x){return x.id===id;}); Object.assign(rec, data); }
+  else { data.id = nextId(); DB.technicians.push(data); rec = data; }
+  if(rec.supabaseId && sbCloud){
+    sbCloud.rpc('update_technician_profile', {
+      p_id: rec.supabaseId, p_coverage_area: rec.area||null, p_skills: rec.skills||null,
+      p_commission_type: rec.commType, p_commission_value: rec.rate||0
+    }).catch(function(){});
+  }
+  save(); closeModal(); renderAll();
+}
+function deleteTech(id){
+  if(!confirm(t('tech.confirmDelete'))) return;
+  DB.technicians = DB.technicians.filter(function(x){return x.id!==id;});
+  save(); closeModal(); renderAll();
+}
+function techCommission(tech, amount){
+  if(!tech) return 0;
+  return tech.rate||0;
+}
+// The commission actually paid on a specific job. Set manually per job (admin can adjust it
+// away from the technician's default at the time of assigning), not a fixed rule per technician.
+// Jobs saved before this existed fall back to whatever the technician's profile rate was.
+function jobTechCommission(j){
+  if(j && typeof j.techComm === 'number') return j.techComm;
+  const tc = DB.technicians.find(function(x){return x.id===(j?j.techId:null);});
+  return techCommission(tc, j?j.amount:0);
+}
+function renderTechnicians(){
+  const el = document.getElementById('techList');
+  if(DB.technicians.length===0){ el.innerHTML = emptyState(ICON.wrench, t('tech.emptyTitle'), t('tech.emptySub')); return; }
+  el.innerHTML = DB.technicians.map(function(tc){
+    const jobCount = DB.jobs.filter(function(j){ return j.techId===tc.id && j.status==='done'; }).length;
+    return '<div class="card" onclick="openTechForm(\''+tc.id+'\')">' +
+      '<div class="row"><div>' +
+        '<div class="name">'+esc(tc.name)+'</div>' +
+        '<div class="sub">'+esc(tc.area||'')+(tc.skills?' · '+esc(tc.skills):'')+'</div>' +
+        '<div class="sub">'+esc(tc.phone||'')+' · '+jobCount+t('tech.jobsDone')+'</div>' +
+      '</div><span class="badge neutral">'+fmtMoney(tc.rate)+'</span></div></div>';
+  }).join('');
+}
+
+/* ---------- JOBS ---------- */
+function techMatchesCategory(tc, category){
+  if(!category || !tc.skills) return false;
+  const cat = category.toLowerCase().trim();
+  return tc.skills.toLowerCase().split(',').some(function(s){
+    s = s.trim();
+    return s && (cat.includes(s) || s.includes(cat));
+  });
+}
+function buildTechOptions(selectedId, category){
+  const techs = DB.technicians.slice().sort(function(a,b){
+    const am = techMatchesCategory(a,category) ? 0 : 1;
+    const bm = techMatchesCategory(b,category) ? 0 : 1;
+    if(am!==bm) return am-bm;
+    return a.name.localeCompare(b.name);
+  });
+  let html = '<option value="">'+t('job.unassigned')+'</option>';
+  techs.forEach(function(tc){
+    const star = techMatchesCategory(tc,category) ? '\u2605 ' : '';
+    html += '<option value="'+tc.id+'"'+(selectedId===tc.id?' selected':'')+'>'+star+esc(tc.name)+(tc.skills?' \u2014 '+esc(tc.skills):'')+'</option>';
+  });
+  return html;
+}
+function onJobCustomerChange(){
+  const c = DB.customers.find(function(x){return x.id===document.getElementById('jCust').value;});
+  const currentSel = document.getElementById('jTech').value;
+  document.getElementById('jTech').innerHTML = buildTechOptions(currentSel, c?c.brand:'');
+}
+function onJobTechChange(){
+  const tc = DB.technicians.find(function(x){return x.id===document.getElementById('jTech').value;});
+  document.getElementById('jTechComm').value = tc ? (tc.rate||0) : '';
+}
+function openJobForm(id){
+  const j = id ? DB.jobs.find(function(x){return x.id===id;}) : null;
+  if(DB.customers.length===0){ alert(t('job.needCustomer')); switchTab('customers'); return; }
+  const initialCust = j ? DB.customers.find(function(x){return x.id===j.custId;}) : DB.customers[0];
+  const custOptions = DB.customers.map(function(c){ return '<option value="'+c.id+'"'+(j&&j.custId===c.id?' selected':(!j&&c.id===initialCust.id?' selected':''))+'>'+esc(c.name)+'</option>'; }).join('');
+  const techOptions = buildTechOptions(j?j.techId:null, initialCust?initialCust.brand:'');
+  const selectedTech = DB.technicians.find(function(x){return x.id===(j?j.techId:null);});
+  const initialTechComm = (j && typeof j.techComm==='number') ? j.techComm : (selectedTech ? (selectedTech.rate||0) : '');
+  const html =
+    '<h2>' + (j?t('job.editTitle'):t('job.addTitle')) + '</h2>' +
+    '<label>'+t('job.customer')+'</label><select id="jCust" onchange="onJobCustomerChange()">'+custOptions+'</select>' +
+    '<label>'+t('job.technician')+'</label><select id="jTech" onchange="onJobTechChange()">'+techOptions+'</select>' +
+    '<label>'+t('job.techCommission')+'</label><input type="number" id="jTechComm" value="'+initialTechComm+'" placeholder="'+t('job.techCommissionPh')+'">' +
+    '<div class="two-col">' +
+      '<div><label>'+t('job.date')+'</label><input type="date" id="jDate" value="'+(j?j.date:todayISO())+'"></div>' +
+      '<div><label>'+t('job.status')+'</label><select id="jobStatus">' +
+        '<option value="new"'+(j&&j.status==='new'?' selected':'')+'>'+t('job.new')+'</option>' +
+        '<option value="assigned"'+(j&&j.status==='assigned'?' selected':'')+'>'+t('job.assigned')+'</option>' +
+        '<option value="in_progress"'+(j&&j.status==='in_progress'?' selected':'')+'>'+t('job.inProgress')+'</option>' +
+        '<option value="done"'+(j&&j.status==='done'?' selected':'')+'>'+t('job.done')+'</option>' +
+        '<option value="cancelled"'+(j&&j.status==='cancelled'?' selected':'')+'>'+t('job.cancelled')+'</option>' +
+      '</select></div>' +
+    '</div>' +
+    '<label>'+t('job.amount')+'</label><input type="number" id="jAmount" value="'+(j?j.amount:'')+'">' +
+    '<label>'+t('job.notes')+'</label><textarea id="jNotes" rows="2">'+(j&&j.notes?esc(j.notes):'')+'</textarea>' +
+    (j&&j.completedNotes?('<label>'+t('job.completedNotes')+'</label><div class="sub" style="margin-bottom:10px;white-space:pre-wrap;">'+esc(j.completedNotes)+'</div>'):'') +
+    (j&&j.appointmentAt?('<label>'+t('job.appointment')+'</label><div class="sub" style="margin-bottom:10px;">'+esc(fmtDateTime(j.appointmentAt))+'</div>'):'') +
+    '<div class="footer-actions"><button class="btn btn-primary btn-block" onclick="saveJob(' + (j?"'"+j.id+"'":'null') + ')">'+t('job.save')+'</button></div>' +
+    (j?('<div class="footer-actions"><button class="btn btn-whatsapp btn-block" onclick="saveAndDispatchWhatsApp(\''+j.id+'\')">'+ICON.whatsapp+' '+t('job.sendWhatsapp')+'</button></div>' +
+        '<div class="footer-actions"><button class="btn btn-whatsapp btn-block" onclick="sendJobFormLink(\''+j.id+'\')">'+ICON.whatsapp+' '+t('jf.sendLink')+'</button></div>' +
+        '<div class="footer-actions"><button class="btn btn-ghost btn-block" onclick="generateInvoice(\''+j.id+'\')">'+ICON.receipt+' '+t('job.generateInvoice')+'</button></div>' +
+        '<div class="footer-actions"><button class="btn btn-danger btn-block" onclick="deleteJob(\''+j.id+'\')">'+t('job.delete')+'</button></div>'):'');
+  openModal(html);
+}
+async function saveJob(id){
+  const custId = document.getElementById('jCust').value;
+  const data = {
+    custId: custId,
+    techId: document.getElementById('jTech').value || null,
+    techComm: parseFloat(document.getElementById('jTechComm').value)||0,
+    date: document.getElementById('jDate').value || todayISO(),
+    status: document.getElementById('jobStatus').value,
+    amount: parseFloat(document.getElementById('jAmount').value)||0,
+    notes: document.getElementById('jNotes').value.trim(),
+    _dirty: true
+  };
+  if(id){ Object.assign(DB.jobs.find(function(x){return x.id===id;}), data); }
+  else { data.id = nextId(); data.created = todayISO(); DB.jobs.push(data); }
+  if(data.status==='done'){
+    const c = DB.customers.find(function(x){return x.id===custId;});
+    if(c) c.lastService = data.date;
+  }
+  save(); closeModal(); renderAll();
+  // Push right away instead of waiting for the next auto-sync cycle — otherwise a job
+  // saved seconds ago has no supabaseId yet, and "Send job report link" fails with
+  // "sync this job first" even though the user just saved. Best-effort: if offline,
+  // this silently does nothing and the regular auto-sync picks it up once back online.
+  if(sbCloud){
+    try{ await pushJobs(); save(); renderAll(); }catch(e){}
+  }
+}
+async function deleteJob(id){
+  if(!confirm(t('job.confirmDelete'))) return;
+  const j = DB.jobs.find(function(x){return x.id===id;});
+  DB.jobs = DB.jobs.filter(function(x){return x.id!==id;});
+  save(); closeModal(); renderAll();
+  // Same best-effort remote delete as deleteCustomer() above.
+  if(j && j.supabaseId){
+    try{ await sbCloud.rpc('delete_job', { p_id: j.supabaseId }); }catch(e){}
+  }
+}
+function openWhatsAppChat(phone){
+  const clean = (phone||'').replace(/[^0-9]/g,'');
+  if(!clean){ return; }
+  window.open('https://wa.me/'+clean, '_blank');
+}
+// The WhatsApp button lives inside the job edit form, so whatever's currently selected
+// (technician, commission, notes, etc.) needs to be persisted before dispatching — otherwise
+// this would silently look up the technician from before any unsaved changes in the form.
+function saveAndDispatchWhatsApp(id){
+  saveJob(id);
+  dispatchWhatsApp(id);
+}
+function dispatchWhatsApp(id){
+  const j = DB.jobs.find(function(x){return x.id===id;});
+  const c = DB.customers.find(function(x){return x.id===j.custId;});
+  const tc = DB.technicians.find(function(x){return x.id===j.techId;});
+  if(!tc || !tc.phone){ alert(t('job.needTechPhone')); return; }
+  const msg = t('wa.title') + '\n' +
+    t('wa.customer') + (c?c.name:'—') + '\n' +
+    t('wa.phone') + (c?c.phone:'—') + '\n' +
+    t('wa.area') + (c?c.area:'—') + '\n' +
+    (c&&c.address?t('wa.address') + c.address + '\n':'') +
+    t('wa.brand') + (c?c.brand:'—') + (c&&c.model?' ('+c.model+')':'') + '\n' +
+    t('wa.date') + fmtDate(j.date) + '\n' +
+    t('wa.amount') + fmtMoney(j.amount) + '\n' +
+    t('wa.notes') + (j.notes||'—');
+  const phone = tc.phone.replace(/[^0-9]/g,'');
+  window.open('https://wa.me/'+phone+'?text='+encodeURIComponent(msg), '_blank');
+}
+// job-form.html base URL — same Neocities site as this app. Update this constant if the
+// site's URL ever changes.
+const JOB_FORM_BASE_URL = 'https://rzulfm.neocities.org/job-form.html';
+async function sendJobFormLink(id){
+  const j = DB.jobs.find(function(x){return x.id===id;});
+  const tc = DB.technicians.find(function(x){return x.id===j.techId;});
+  if(!tc || !tc.phone){ alert(t('job.needTechPhone')); return; }
+  if(!j.supabaseId && sbCloud){
+    // Don't just fail here — the job (or its customer) may simply never have made it
+    // up in a prior sync. Try once, right now, before giving up.
+    lastSyncErrors = [];
+    try{ await pushCustomers(); await pushJobs(); save(); renderAll(); }catch(e){}
+  }
+  if(!j.supabaseId){
+    alert(lastSyncErrors.length ? (t('job.needSyncFirst')+'\n\n'+lastSyncErrors.join('\n')) : t('job.needSyncFirst'));
+    return;
+  }
+  const link = JOB_FORM_BASE_URL + '?job=' + encodeURIComponent(j.supabaseId);
+  const msg = t('jf.msg') + '\n' + link;
+  const phone = tc.phone.replace(/[^0-9]/g,'');
+  window.open('https://wa.me/'+phone+'?text='+encodeURIComponent(msg), '_blank');
+}
+function openIssueInvoiceForm(custId){
+  const c = DB.customers.find(function(x){return x.id===custId;});
+  if(!c) return;
+  const suggestedNo = 'INV-' + String(DB.invSeq).padStart(4,'0');
+  const html =
+    '<h2>'+t('cust.issueInvoice')+'</h2>' +
+    '<div class="sub" style="margin-bottom:8px;">'+esc(c.name)+'</div>' +
+    '<label>'+t('inv.no')+'</label><input type="text" id="qiInvoiceNo" value="'+esc(suggestedNo)+'">' +
+    '<label>'+t('job.date')+'</label><input type="date" id="qiDate" value="'+todayISO()+'">' +
+    '<label>'+t('job.notes')+'</label><textarea id="qiDesc" rows="3" placeholder="'+t('cust.issueInvoiceDescPh')+'"></textarea>' +
+    '<label>'+t('job.amount')+'</label><input type="number" id="qiAmount">' +
+    '<div class="footer-actions"><button class="btn btn-primary btn-block" onclick="issueInvoiceForCustomer(\''+c.id+'\')">'+ICON.receipt+' '+t('cust.issueInvoice')+'</button></div>';
+  openModal(html);
+}
+function issueInvoiceForCustomer(custId){
+  const amount = parseFloat(document.getElementById('qiAmount').value)||0;
+  if(amount<=0){ alert(t('job.amountRequired')); return; }
+  const date = document.getElementById('qiDate').value || todayISO();
+  const notes = document.getElementById('qiDesc').value.trim();
+  const invoiceNo = document.getElementById('qiInvoiceNo').value.trim() || ('INV-' + String(DB.invSeq).padStart(4,'0'));
+  const job = { id:nextId(), custId:custId, techId:null, date:date, status:'done', amount:amount, notes:notes, created:todayISO(), invoiceNo:invoiceNo };
+  DB.jobs.push(job);
+  DB.invSeq++;
+  const c = DB.customers.find(function(x){return x.id===custId;});
+  if(c) c.lastService = date;
+  save();
+  closeModal();
+  renderAll();
+  generateInvoice(job.id);
+}
+function wrapText(ctx, text, maxWidth){
+  const paragraphs = String(text||'').split('\n');
+  let lines = [];
+  paragraphs.forEach(function(p){
+    const words = p.split(' ');
+    let line = '';
+    for(let i=0;i<words.length;i++){
+      const test = line ? line+' '+words[i] : words[i];
+      if(line && ctx.measureText(test).width > maxWidth){
+        lines.push(line);
+        line = words[i];
+      } else {
+        line = test;
+      }
+    }
+    lines.push(line);
+  });
+  return lines;
+}
+function loadImagePromise(src){
+  return new Promise(function(resolve){
+    if(!src){ resolve(null); return; }
+    const img = new Image();
+    img.onload = function(){ resolve(img); };
+    img.onerror = function(){ resolve(null); };
+    img.src = src;
+  });
+}
+function renderInvoicePNG(j, c, biz){
+  return Promise.all([loadImagePromise(biz.logo), loadImagePromise(biz.qr)]).then(function(imgs){
+    const logoImg = imgs[0], qrImg = imgs[1];
+    const W = 800, PAD = 44, contentW = W - PAD*2;
+    const RENDER_SCALE = 3; // preview-image pixel density only; the real PDF below is vector, not scaled pixels
+    const SCRATCH_H = 1800;
+    const scratch = document.createElement('canvas');
+    scratch.width = W*RENDER_SCALE; scratch.height = SCRATCH_H*RENDER_SCALE;
+    const ctx = scratch.getContext('2d');
+    ctx.scale(RENDER_SCALE, RENDER_SCALE);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0,0,W,SCRATCH_H);
+
+    // Every draw below is logged here (real text + line + image placements, in the same
+    // 800px-wide logical coordinate space as the canvas). This log is what buildVectorInvoicePDF
+    // uses afterwards to write actual PDF text operators instead of flattening everything to one JPEG.
+    const layout = [];
+
+    function drawText(str, x, y, opts){
+      opts = opts || {};
+      const size = opts.size || 13, bold = !!opts.bold, serif = !!opts.serif;
+      const color = opts.color || '#000000', align = opts.align || 'left';
+      const family = serif ? '"Times New Roman", Georgia, serif' : 'Arial';
+      ctx.font = (bold?'bold ':'') + size + 'px ' + family;
+      ctx.fillStyle = color;
+      ctx.textAlign = align;
+      ctx.fillText(str, x, y);
+      const w = ctx.measureText(str).width;
+      const leftX = align==='right' ? x - w : (align==='center' ? x - w/2 : x);
+      layout.push({type:'text', str:str, leftX:leftX, y:y, size:size, bold:bold, serif:serif, color:color});
+    }
+    function drawLine(x1,y1,x2,y2,color,width){
+      ctx.strokeStyle = color; ctx.lineWidth = width;
+      ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+      layout.push({type:'line', x1:x1, y1:y1, x2:x2, y2:y2, color:color, width:width});
+    }
+    function drawImg(img, name, x, y, w, h, smooth){
+      if(smooth===false) ctx.imageSmoothingEnabled = false;
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(img, x, y, w, h);
+      ctx.imageSmoothingEnabled = true;
+      layout.push({type:'image', name:name, x:x, y:y, w:w, h:h});
+    }
+
+    const bizName = biz.name || 'Nizam Service & Repair';
+    ctx.font = '13px Arial';
+    const bizDetailLines = wrapText(ctx, [biz.phone, biz.address].filter(Boolean).join('\n'), contentW*0.5);
+
+    const custBlock = [];
+    if(c){
+      custBlock.push(c.name);
+      if(c.phone) custBlock.push(c.phone);
+      if(c.address) custBlock.push(c.address);
+      if(c.area) custBlock.push(c.area);
+    } else { custBlock.push('—'); }
+    let custLines = [];
+    custBlock.forEach(function(line){ custLines = custLines.concat(wrapText(ctx, line, contentW)); });
+
+    const serviceDesc = t('inv.serviceLine') + (c && c.brand ? ' — ' + c.brand + (c.model?' ('+c.model+')':'') : '');
+    ctx.font = '14px Arial';
+    const descLines = wrapText(ctx, serviceDesc, contentW*0.72);
+    ctx.font = '12px Arial';
+    const notesLines = j.notes ? wrapText(ctx, j.notes, contentW*0.72) : [];
+    const payLines = biz.payment ? (function(){ ctx.font='13px Arial'; return wrapText(ctx, biz.payment, contentW); })() : [];
+
+    let headerLeftX = PAD;
+    if(logoImg){
+      drawImg(logoImg, 'logo', PAD, PAD, 48, 48);
+      headerLeftX = PAD + 48 + 12;
+    }
+    drawText(bizName, headerLeftX, PAD + 22, {size:20, bold:true, serif:true, color:'#0A3A37'});
+    let by = PAD + 42;
+    bizDetailLines.forEach(function(line){ drawText(line, headerLeftX, by, {size:13, color:'#555555'}); by += 17; });
+
+    drawText(t('inv.title'), W - PAD, PAD + 24, {size:26, bold:true, serif:true, color:'#0E4F4A', align:'right'});
+    drawText(t('inv.no')+': '+j.invoiceNo, W-PAD, PAD+44, {size:12, color:'#555555', align:'right'});
+    drawText(t('inv.date')+': '+fmtDate(j.date), W-PAD, PAD+60, {size:12, color:'#555555', align:'right'});
+
+    let headerBottom = Math.max(by, PAD + 66) + 14;
+    drawLine(PAD, headerBottom, W-PAD, headerBottom, '#0E4F4A', 3);
+
+    let yy = headerBottom + 26;
+    drawText(t('inv.billTo').toUpperCase(), PAD, yy, {size:11, color:'#888888'});
+    yy += 18;
+    custLines.forEach(function(line, idx){
+      drawText(line, PAD, yy, idx===0 ? {size:15, bold:true, color:'#152623'} : {size:13, color:'#152623'});
+      yy += 18;
+    });
+
+    yy += 14;
+    drawText(t('inv.desc').toUpperCase(), PAD, yy, {size:11, color:'#888888'});
+    drawText(t('inv.amount').toUpperCase(), W-PAD, yy, {size:11, color:'#888888', align:'right'});
+    yy += 8;
+    drawLine(PAD, yy, W-PAD, yy, '#dddddd', 1);
+    yy += 22;
+
+    const rowTopY = yy;
+    descLines.forEach(function(line){ drawText(line, PAD, yy, {size:14, color:'#152623'}); yy += 18; });
+    if(notesLines.length){
+      notesLines.forEach(function(line){ drawText(line, PAD, yy, {size:12, color:'#888888'}); yy += 16; });
+    }
+    drawText(fmtMoney(j.amount), W-PAD, rowTopY, {size:14, color:'#152623', align:'right'});
+
+    yy += 14;
+    drawLine(PAD, yy, W-PAD, yy, '#eeeeee', 1);
+    yy += 26;
+
+    drawText(t('inv.total'), PAD, yy, {size:16, bold:true, color:'#152623'});
+    drawText(fmtMoney(j.amount), W-PAD, yy, {size:16, bold:true, color:'#152623', align:'right'});
+    yy += 10;
+    drawLine(PAD, yy, W-PAD, yy, '#0E4F4A', 2);
+    yy += 30;
+
+    if(payLines.length || qrImg){
+      const paySectionTop = yy;
+      if(payLines.length){
+        drawText(t('inv.paymentInfo').toUpperCase(), PAD, yy, {size:11, color:'#888888'});
+        yy += 18;
+        payLines.forEach(function(line){ drawText(line, PAD, yy, {size:13, color:'#152623'}); yy += 17; });
+      }
+      if(qrImg){
+        const qrSize = 150;
+        const qrX = W - PAD - qrSize;
+        const qrTargetPx = qrSize * RENDER_SCALE;
+        const isUpscaling = qrImg.width < qrTargetPx && qrImg.height < qrTargetPx;
+        drawImg(qrImg, 'qr', qrX, paySectionTop, qrSize, qrSize, !isUpscaling);
+        drawText(t('inv.qrScan'), qrX + qrSize/2, paySectionTop + qrSize + 12, {size:10, color:'#888888', align:'center'});
+        yy = Math.max(yy, paySectionTop + qrSize + 12);
+      }
+      yy += 14;
+    }
+    drawText(t('inv.thankyou'), PAD, yy, {size:12, color:'#666666'});
+
+    const finalH = Math.ceil(yy + PAD);
+    const finalCanvas = document.createElement('canvas');
+    finalCanvas.width = W*RENDER_SCALE; finalCanvas.height = finalH*RENDER_SCALE;
+    finalCanvas.getContext('2d').drawImage(scratch, 0, 0, W*RENDER_SCALE, finalH*RENDER_SCALE, 0, 0, W*RENDER_SCALE, finalH*RENDER_SCALE);
+
+    // Preview image is exported as a data: URL (not a blob: object URL) because blob URLs
+    // assigned to an <img> injected via innerHTML can fail to decode on first paint on some
+    // Android Chrome/WebView builds (the element is often still display:none when the src is
+    // set), leaving a permanent broken-image icon even though the blob itself is valid. A
+    // data: URL has no such async decode/registry step, so it paints reliably every time.
+    const previewDataUrl = finalCanvas.toDataURL('image/jpeg', 0.85);
+    return new Promise(function(resolve, reject){
+      finalCanvas.toBlob(function(previewBlob){
+        if(!previewBlob){ reject(new Error('toBlob failed')); return; }
+        Promise.all([encodeImageForPDF(logoImg), encodeImageForPDF(qrImg)]).then(function(encoded){
+          const images = [];
+          if(encoded[0]) images.push({ name:'logo', bytes:encoded[0].bytes, width:encoded[0].width, height:encoded[0].height });
+          if(encoded[1]) images.push({ name:'qr', bytes:encoded[1].bytes, width:encoded[1].width, height:encoded[1].height });
+          const pdfBytes = buildVectorInvoicePDF(layout, W, finalH, images);
+          resolve({ previewDataUrl: previewDataUrl, pdfBlob: new Blob([pdfBytes], {type:'application/pdf'}) });
+        }).catch(reject);
+      }, 'image/jpeg', 0.85);
+    });
+  });
+}
+// Re-encodes an uploaded logo/QR image (whatever format it was uploaded as) onto a plain
+// white background and re-exports as JPEG, so it can be embedded into the PDF as a small,
+// self-contained DCTDecode image object — at its own native resolution, not blown up to
+// cover the whole page like the old approach did.
+function encodeImageForPDF(img){
+  if(!img) return Promise.resolve(null);
+  return new Promise(function(resolve){
+    const w = img.naturalWidth || img.width, h = img.naturalHeight || img.height;
+    if(!w || !h){ resolve(null); return; }
+    const cnv = document.createElement('canvas');
+    cnv.width = w; cnv.height = h;
+    const cctx = cnv.getContext('2d');
+    cctx.fillStyle = '#ffffff';
+    cctx.fillRect(0,0,w,h);
+    cctx.drawImage(img, 0, 0, w, h);
+    cnv.toBlob(function(blob){
+      if(!blob){ resolve(null); return; }
+      blob.arrayBuffer().then(function(buf){
+        resolve({ bytes: new Uint8Array(buf), width: w, height: h });
+      }).catch(function(){ resolve(null); });
+    }, 'image/jpeg', 0.95);
+  });
+}
+// Builds a real vector PDF from the drawing log captured above: actual text-drawing (Tj)
+// operators using the PDF standard fonts (no font embedding needed), plus the logo/QR as
+// small embedded JPEGs. This is what the old renderer didn't do — it rasterized the entire
+// invoice (including all the text) into one big JPEG and stuffed that into the PDF, which is
+// why it always looked soft next to a normal invoice PDF with crisp, scalable text.
+function buildVectorInvoicePDF(layout, pageWpx, pageHpx, images){
+  const PXTOPT = 0.75; // 96 CSS px/in -> 72 PDF pt/in, same ratio the old renderer used
+  const pageW = pageWpx*PXTOPT, pageH = pageHpx*PXTOPT;
+  const FONTKEY = { 'sans-normal':'F1', 'sans-bold':'F2', 'serif-bold':'F3', 'serif-normal':'F4' };
+  const FONTNAME = { F1:'Helvetica', F2:'Helvetica-Bold', F3:'Times-Bold', F4:'Times-Roman' };
+  // PDF's standard-14 fonts only support single-byte WinAnsi text, so a small set of common
+  // typographic characters (em dash etc.) are folded down to plain ASCII equivalents here.
+  const ASCII_FALLBACK = { 0x2014:'-', 0x2013:'-', 0x2018:"'", 0x2019:"'", 0x201C:'"', 0x201D:'"', 0x2026:'...', 0x2022:'-' };
+  function esc(str){
+    let out = '';
+    for(const ch of String(str==null?'':str)){
+      const code = ch.codePointAt(0);
+      const mapped = code>127 ? (ASCII_FALLBACK[code] || '?') : ch;
+      for(const mc of mapped){
+        if(mc==='\\') out += '\\\\';
+        else if(mc==='(') out += '\\(';
+        else if(mc===')') out += '\\)';
+        else out += mc;
+      }
+    }
+    return out;
+  }
+  function rgb01(hex){
+    const m = /^#?([0-9a-f]{6})$/i.exec(String(hex||'#000000').replace('#',''));
+    const n = m ? parseInt(m[1],16) : 0;
+    return [((n>>16)&255)/255, ((n>>8)&255)/255, (n&255)/255];
+  }
+
+  const imageNums = {}; // populated once object numbers are assigned below
+
+  let cs = 'q\n';
+  layout.forEach(function(item){
+    if(item.type==='line'){
+      const rgb = rgb01(item.color);
+      const x1=item.x1*PXTOPT, y1=pageH-item.y1*PXTOPT, x2=item.x2*PXTOPT, y2=pageH-item.y2*PXTOPT;
+      cs += rgb[0].toFixed(3)+' '+rgb[1].toFixed(3)+' '+rgb[2].toFixed(3)+' RG '+(item.width||1).toFixed(2)+' w\n';
+      cs += x1.toFixed(2)+' '+y1.toFixed(2)+' m '+x2.toFixed(2)+' '+y2.toFixed(2)+' l S\n';
+    } else if(item.type==='text'){
+      const rgb = rgb01(item.color);
+      const key = FONTKEY[(item.serif?'serif':'sans')+'-'+(item.bold?'bold':'normal')] || 'F1';
+      const size = item.size*PXTOPT;
+      const x = item.leftX*PXTOPT, y = pageH - item.y*PXTOPT;
+      cs += 'BT /'+key+' '+size.toFixed(2)+' Tf '+rgb[0].toFixed(3)+' '+rgb[1].toFixed(3)+' '+rgb[2].toFixed(3)+' rg 1 0 0 1 '+x.toFixed(2)+' '+y.toFixed(2)+' Tm ('+esc(item.str)+') Tj ET\n';
+    } else if(item.type==='image'){
+      // imageNums gets filled in just below, before this content stream is actually used
+      const w = item.w*PXTOPT, h = item.h*PXTOPT;
+      const x = item.x*PXTOPT, y = pageH - (item.y+item.h)*PXTOPT;
+      cs += '__IMG_'+item.name+'__ '+w.toFixed(2)+' 0 0 '+h.toFixed(2)+' '+x.toFixed(2)+' '+y.toFixed(2)+' cm /'+item.name+' Do Q\n';
+    }
+  });
+  cs += 'Q';
+  // q/Q wrapping for images: replace the placeholder with a plain 'q' now that we know
+  // every referenced image actually has bytes (skip drawing any that failed to encode).
+  const availableImages = {}; images.forEach(function(im){ availableImages[im.name] = true; });
+  cs = cs.split('\n').filter(function(line){
+    const m = /^__IMG_(\w+)__/.exec(line);
+    if(!m) return true;
+    return !!availableImages[m[1]];
+  }).map(function(line){
+    return line.replace(/^__IMG_\w+__/, 'q');
+  }).join('\n');
+
+  const enc = new TextEncoder();
+  const chunks = []; const offsets = {}; let pos = 0;
+  function push(part){ const b = (typeof part==='string') ? enc.encode(part) : part; chunks.push(b); pos += b.length; }
+
+  push('%PDF-1.4\n');
+  let n = 1;
+  const catalogNum = n++, pagesNum = n++, pageNum = n++;
+  const fontNums = { F1:n++, F2:n++, F3:n++, F4:n++ };
+  images.forEach(function(im){ imageNums[im.name] = n++; });
+  const contentNum = n++;
+
+  offsets[catalogNum]=pos; push(catalogNum+' 0 obj\n<< /Type /Catalog /Pages '+pagesNum+' 0 R >>\nendobj\n');
+  offsets[pagesNum]=pos; push(pagesNum+' 0 obj\n<< /Type /Pages /Kids ['+pageNum+' 0 R] /Count 1 >>\nendobj\n');
+
+  const fontDict = ['F1','F2','F3','F4'].map(function(k){ return '/'+k+' '+fontNums[k]+' 0 R'; }).join(' ');
+  const xobjDict = images.map(function(im){ return '/'+im.name+' '+imageNums[im.name]+' 0 R'; }).join(' ');
+  offsets[pageNum]=pos; push(pageNum+' 0 obj\n<< /Type /Page /Parent '+pagesNum+' 0 R /MediaBox [0 0 '+pageW.toFixed(2)+' '+pageH.toFixed(2)+'] /Resources << /Font << '+fontDict+' >> /XObject << '+xobjDict+' >> >> /Contents '+contentNum+' 0 R >>\nendobj\n');
+
+  ['F1','F2','F3','F4'].forEach(function(k){
+    offsets[fontNums[k]]=pos;
+    push(fontNums[k]+' 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /'+FONTNAME[k]+' /Encoding /WinAnsiEncoding >>\nendobj\n');
+  });
+
+  images.forEach(function(im){
+    const num = imageNums[im.name];
+    offsets[num]=pos;
+    push(num+' 0 obj\n<< /Type /XObject /Subtype /Image /Width '+im.width+' /Height '+im.height+' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length '+im.bytes.length+' >>\nstream\n');
+    push(im.bytes);
+    push('\nendstream\nendobj\n');
+  });
+
+  const csBytes = enc.encode(cs);
+  offsets[contentNum]=pos; push(contentNum+' 0 obj\n<< /Length '+csBytes.length+' >>\nstream\n');
+  push(csBytes);
+  push('\nendstream\nendobj\n');
+
+  const totalObjs = n-1;
+  const xrefStart = pos;
+  push('xref\n0 '+(totalObjs+1)+'\n0000000000 65535 f \n');
+  for(let i=1;i<=totalObjs;i++){ push(String(offsets[i]).padStart(10,'0')+' 00000 n \n'); }
+  push('trailer\n<< /Size '+(totalObjs+1)+' /Root '+catalogNum+' 0 R >>\nstartxref\n'+xrefStart+'\n%%EOF');
+
+  let total = 0; chunks.forEach(function(c){ total += c.length; });
+  const out = new Uint8Array(total); let o = 0;
+  chunks.forEach(function(c){ out.set(c,o); o += c.length; });
+  return out;
+}
+function triggerDownload(blob, filename){
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 4000);
+}
+function showInvoiceResultModal(previewDataUrl, pdfBlob, j, c, biz){
+  let html = '<h2>' + t('inv.title') + ' ' + j.invoiceNo + '</h2>';
+  html += '<div class="sub" style="margin-bottom:10px;">' + t('inv.downloaded') + '</div>';
+  html += '<div style="text-align:center;margin-bottom:12px;"><img src="' + previewDataUrl + '" style="max-width:100%;border:1px solid var(--line);border-radius:8px;"></div>';
+  html += '<div class="footer-actions"><button class="btn btn-whatsapp btn-block" id="invShareBtn">' + ICON.whatsapp + ' ' + t('inv.sendWhatsapp') + '</button></div>';
+  openModal(html);
+  document.getElementById('invShareBtn').onclick = function(){ shareInvoicePDF(pdfBlob, j, c, biz); };
+}
+function shareInvoicePDF(pdfBlob, j, c, biz){
+  const filename = j.invoiceNo + '.pdf';
+  if(navigator.share && navigator.canShare){
+    const file = new File([pdfBlob], filename, {type:'application/pdf'});
+    if(navigator.canShare({files:[file]})){
+      navigator.share({files:[file], title: t('inv.title')+' '+j.invoiceNo}).catch(function(){});
+      return;
+    }
+  }
+  const waPhone = c && c.phone ? c.phone.replace(/[^0-9]/g,'') : '';
+  if(!waPhone){ alert(t('inv.noPhoneForShare')); return; }
+  const serviceDescPlain = t('inv.serviceLine') + (c && c.brand ? ' — ' + c.brand + (c.model?' ('+c.model+')':'') : '');
+  const waMsg = t('inv.title') + ' ' + j.invoiceNo + '\n' +
+    (biz.name||'Nizam Service & Repair') + '\n\n' +
+    t('inv.billTo') + ': ' + (c?c.name:'—') + '\n' +
+    t('inv.date') + ': ' + fmtDate(j.date) + '\n' +
+    t('inv.desc') + ': ' + serviceDescPlain + (j.notes?' - '+j.notes:'') + '\n' +
+    t('inv.total') + ': ' + fmtMoney(j.amount) + '\n' +
+    (biz.payment? t('inv.paymentInfo')+': '+biz.payment+'\n' : '') +
+    t('inv.thankyou') + '\n\n' + t('inv.attachReminder');
+  window.open('https://wa.me/'+waPhone+'?text='+encodeURIComponent(waMsg), '_blank');
+}
+async function generateInvoice(id){
+  const j = DB.jobs.find(function(x){return x.id===id;});
+  const c = DB.customers.find(function(x){return x.id===j.custId;});
+  if(!j.invoiceNo){
+    j.invoiceNo = 'INV-' + String(DB.invSeq).padStart(4,'0');
+    DB.invSeq++;
+    save();
+    renderAll();
+  }
+  const biz = DB.settings.business || {};
+  let assets;
+  try{
+    assets = await renderInvoicePNG(j, c, biz);
+  }catch(err){
+    alert(t('inv.genError'));
+    return;
+  }
+  triggerDownload(assets.pdfBlob, j.invoiceNo+'.pdf');
+  showInvoiceResultModal(assets.previewDataUrl, assets.pdfBlob, j, c, biz);
+}
+function statusBadge(status){
+  const map = { new:[t('job.new'),'neutral'], assigned:[t('job.assigned'),'warn'], in_progress:[t('job.inProgress'),'active'], done:[t('job.done'),'ok'], cancelled:[t('job.cancelled'),'bad'] };
+  const pair = map[status]||['—','neutral'];
+  return '<span class="badge '+pair[1]+'">'+pair[0]+'</span>';
+}
+function renderJobs(){
+  const chipEl = document.getElementById('jobFilterChip');
+  if(jobFilter==='open'){
+    chipEl.innerHTML = '<span class="filter-chip">'+t('filter.open')+' <button onclick="clearJobFilter()">'+t('filter.clear')+'</button></span>';
+  } else if(jobFilter==='month'){
+    chipEl.innerHTML = '<span class="filter-chip">'+t('filter.month')+' <button onclick="clearJobFilter()">'+t('filter.clear')+'</button></span>';
+  } else {
+    chipEl.innerHTML = '';
+  }
+  const q = (document.getElementById('jobSearch').value||'').toLowerCase();
+  const thisMonth = todayISO().slice(0,7);
+  const list = DB.jobs.slice().sort(function(a,b){ return b.date.localeCompare(a.date); });
+  const filtered = list.filter(function(j){
+    if(jobFilter==='open' && !(j.status==='new'||j.status==='assigned'||j.status==='in_progress')) return false;
+    if(jobFilter==='month' && !(j.status==='done' && j.date.slice(0,7)===thisMonth)) return false;
+    if(!q) return true;
+    const c = DB.customers.find(function(x){return x.id===j.custId;});
+    const tc = DB.technicians.find(function(x){return x.id===j.techId;});
+    return (c&&c.name.toLowerCase().includes(q)) || (tc&&tc.name.toLowerCase().includes(q));
+  });
+  const el = document.getElementById('jobsList');
+  if(filtered.length===0){ el.innerHTML = emptyState(ICON.clipboard, t('job.emptyTitle'), t('job.emptySub')); return; }
+  el.innerHTML = filtered.map(function(j){
+    const c = DB.customers.find(function(x){return x.id===j.custId;});
+    const tc = DB.technicians.find(function(x){return x.id===j.techId;});
+    const comm = jobTechCommission(j);
+    return '<div class="card" onclick="openJobForm(\''+j.id+'\')">' +
+      '<div class="row"><div>' +
+        '<div class="name">'+(c?esc(c.name):t('job.deletedCustomer'))+'</div>' +
+        '<div class="sub">'+(tc?esc(tc.name):t('job.unassigned'))+' · '+fmtDate(j.date)+'</div>' +
+        '<div class="sub">'+fmtMoney(j.amount)+t('job.charged')+fmtMoney(comm)+t('job.forTech')+fmtMoney(PLATFORM_FEE_PER_JOB)+t('job.platformFee')+fmtMoney(j.amount-comm-PLATFORM_FEE_PER_JOB)+t('job.forYou')+'</div>' +
+        (j.invoiceNo ? '<div class="sub">'+j.invoiceNo+'</div>' : '') +
+      '</div>'+statusBadge(j.status)+'</div></div>';
+  }).join('');
+}
+
+/* ---------- DASHBOARD ---------- */
+function renderDashboard(){
+  const openJobs = DB.jobs.filter(function(j){ return j.status==='new'||j.status==='assigned'||j.status==='in_progress'; });
+  document.getElementById('statPending').textContent = openJobs.length;
+
+  const dueSoon = DB.customers.filter(function(c){
+    const due = nextDueDate(c);
+    if(!due) return false;
+    const diff = daysBetween(todayISO(), due);
+    return diff <= 7;
+  });
+  document.getElementById('statDue').textContent = dueSoon.length;
+
+  const thisMonth = todayISO().slice(0,7);
+  const doneThisMonth = DB.jobs.filter(function(j){ return j.status==='done' && j.date.slice(0,7)===thisMonth; });
+  const kasar = doneThisMonth.reduce(function(s,j){ return s+j.amount; },0);
+  const payouts = doneThisMonth.reduce(function(s,j){
+    return s + jobTechCommission(j);
+  },0);
+  const platformFees = doneThisMonth.length * PLATFORM_FEE_PER_JOB;
+  const bersih = kasar - payouts - platformFees;
+  document.getElementById('statRevenue').textContent = fmtMoney(kasar);
+  document.getElementById('statProfit').textContent = fmtMoney(bersih);
+
+  const attn = document.getElementById('attentionList');
+  const overdue = DB.customers.filter(function(c){ const d=nextDueDate(c); return d && daysBetween(todayISO(),d)<0; });
+  const items = overdue.map(function(c){return {c:c};})
+    .concat(dueSoon.filter(function(c){return overdue.indexOf(c)===-1;}).map(function(c){return {c:c};}))
+    .slice(0,5);
+  if(items.length===0){
+    attn.innerHTML = '<div class="empty"><div class="big" style="background:var(--ok-tint);color:var(--ok);">'+ICON.check+'</div>'+t('dash.allClear')+'</div>';
+  } else {
+    attn.innerHTML = items.map(function(item){
+      const c = item.c;
+      const st = dueStatus(c);
+      return '<div class="card" onclick="openCustomerForm(\''+c.id+'\')">' +
+        '<div class="row"><div><div class="name">'+esc(c.name)+'</div><div class="sub">'+esc(c.area||'')+' · '+esc(c.brand||'')+'</div></div>' +
+        '<span class="badge '+st.cls+'">'+st.label+'</span></div></div>';
+    }).join('');
+  }
+
+  const recent = document.getElementById('recentJobs');
+  const recentJ = DB.jobs.slice().sort(function(a,b){ return b.date.localeCompare(a.date); }).slice(0,4);
+  if(recentJ.length===0){
+    recent.innerHTML = emptyState(ICON.clipboard, t('job.emptyTitle'), t('job.emptySubDash'));
+  } else {
+    recent.innerHTML = recentJ.map(function(j){
+      const c = DB.customers.find(function(x){return x.id===j.custId;});
+      const tc = DB.technicians.find(function(x){return x.id===j.techId;});
+      return '<div class="card" onclick="openJobForm(\''+j.id+'\')">' +
+        '<div class="row"><div><div class="name">'+(c?esc(c.name):t('job.deletedCustomer'))+'</div><div class="sub">'+(tc?esc(tc.name):t('job.unassigned'))+' · '+fmtDate(j.date)+'</div></div>' +
+        statusBadge(j.status)+'</div></div>';
+    }).join('');
+  }
+}
+
+/* ---------- FINANCIAL REPORT ---------- */
+function renderFinancialReport(){
+  const input = document.getElementById('reportMonth');
+  if(!input.value) input.value = todayISO().slice(0,7);
+  const month = input.value;
+  const jobsInMonth = DB.jobs.filter(function(j){ return j.status==='done' && j.date.slice(0,7)===month; });
+  const revenue = jobsInMonth.reduce(function(s,j){ return s+j.amount; },0);
+  const techPayouts = jobsInMonth.reduce(function(s,j){ return s+jobTechCommission(j); },0);
+  const grossProfit = revenue - techPayouts;
+  const systemFees = jobsInMonth.length * PLATFORM_FEE_PER_JOB;
+  const netProfit = grossProfit - systemFees;
+  document.getElementById('reportResults').innerHTML =
+    '<div class="row"><span>'+t('report.jobsCompleted')+'</span><span>'+jobsInMonth.length+'</span></div>' +
+    '<div class="row"><span>'+t('report.revenue')+'</span><span>'+fmtMoney(revenue)+'</span></div>' +
+    '<div class="row"><span>'+t('report.techPayouts')+'</span><span>-'+fmtMoney(techPayouts)+'</span></div>' +
+    '<div class="row"><span><b>'+t('report.grossProfit')+'</b></span><span><b>'+fmtMoney(grossProfit)+'</b></span></div>' +
+    '<div class="row"><span>'+t('report.systemFees')+'</span><span>-'+fmtMoney(systemFees)+'</span></div>' +
+    '<div class="row"><span><b>'+t('report.netProfit')+'</b></span><span><b>'+fmtMoney(netProfit)+'</b></span></div>';
+}
+
+/* ---------- SETTINGS ---------- */
+function saveInterval(){
+  DB.settings.intervalMonths = parseInt(document.getElementById('defaultInterval').value) || 3;
+  save(); renderAll();
+  alert(t('settings.saved'));
+}
+function saveBusiness(){
+  DB.settings.business.name = document.getElementById('bizName').value.trim();
+  DB.settings.business.phone = document.getElementById('bizPhone').value.trim();
+  DB.settings.business.address = document.getElementById('bizAddress').value.trim();
+  DB.settings.business.payment = document.getElementById('bizPayment').value.trim();
+  save();
+  alert(t('settings.saved'));
+}
+function handleLogoUpload(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const MAX_BYTES = 300*1024;
+  if(file.size > MAX_BYTES){ alert(t('settings.imgTooLarge').replace('{max}','300KB')); e.target.value=''; return; }
+  const reader = new FileReader();
+  reader.onload = function(ev){
+    DB.settings.business.logo = ev.target.result;
+    save();
+    renderLogoPreview();
+  };
+  reader.readAsDataURL(file);
+}
+function removeLogo(){
+  DB.settings.business.logo = '';
+  save();
+  renderLogoPreview();
+}
+function renderLogoPreview(){
+  const biz = DB.settings.business||{};
+  const el = document.getElementById('bizLogoPreview');
+  el.innerHTML = biz.logo ? '<img src="'+biz.logo+'">' : '';
+  const removeBtn = document.getElementById('bizLogoRemove');
+  if(removeBtn) removeBtn.style.display = biz.logo ? 'inline-flex' : 'none';
+}
+function handleQrUpload(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const MAX_BYTES = 500*1024;
+  if(file.size > MAX_BYTES){ alert(t('settings.imgTooLarge').replace('{max}','500KB')); e.target.value=''; return; }
+  const reader = new FileReader();
+  reader.onload = function(ev){
+    DB.settings.business.qr = ev.target.result;
+    save();
+    renderQrPreview();
+  };
+  reader.readAsDataURL(file);
+}
+function removeQr(){
+  DB.settings.business.qr = '';
+  save();
+  renderQrPreview();
+}
+function renderQrPreview(){
+  const biz = DB.settings.business||{};
+  const el = document.getElementById('bizQrPreview');
+  el.innerHTML = biz.qr ? '<img src="'+biz.qr+'">' : '';
+  const removeBtn = document.getElementById('bizQrRemove');
+  if(removeBtn) removeBtn.style.display = biz.qr ? 'inline-flex' : 'none';
+}
+function exportData(){
+  const blob = new Blob([JSON.stringify(DB,null,2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = t('settings.exportPrefix') + todayISO() + '.json';
+  a.click();
+}
+function importData(){
+  const f = document.getElementById('importFile').files[0];
+  if(!f){ alert(t('settings.chooseFile')); return; }
+  if(!confirm(t('settings.confirmRestore'))) return;
+  const reader = new FileReader();
+  reader.onload = function(e){
+    try{
+      const parsed = JSON.parse(e.target.result);
+      DB = normalizeDB(parsed);
+      save();
+      renderAll();
+      alert(t('settings.restored'));
+    }catch(err){ alert(t('settings.badFile')); }
+  };
+  reader.readAsText(f);
+}
+
+/* ---------- UTIL ---------- */
+function esc(s){ return (s||'').toString().replace(/[&<>"']/g, function(m){
+  return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];
+}); }
+function emptyState(icon,title,sub){
+  return '<div class="empty"><div class="big">'+icon+'</div><div style="font-weight:600;color:var(--ink);margin-bottom:4px;">'+title+'</div>'+sub+'</div>';
+}
+
+function renderAll(){
+  renderDashboard();
+  renderJobs();
+  renderCustomers();
+  renderTechnicians();
+  renderFinancialReport();
+  refreshSyncStatusLabel();
+  document.getElementById('defaultInterval').value = DB.settings.intervalMonths||3;
+  const biz = DB.settings.business||{};
+  document.getElementById('bizName').value = biz.name||'';
+  document.getElementById('bizPhone').value = biz.phone||'';
+  document.getElementById('bizAddress').value = biz.address||'';
+  document.getElementById('bizPayment').value = biz.payment||'';
+  renderLogoPreview();
+  renderQrPreview();
+}
+document.getElementById('jobSearch').addEventListener('input', renderJobs);
+document.getElementById('custSearch').addEventListener('input', renderCustomers);
+
+/* ---------- PIN LOCK ---------- */
+const INACTIVITY_MS = 5*60*1000;
+let pinBuffer = '';
+let lastActivity = Date.now();
+let appLocked = true;
+
+function updatePinDots(errorState){
+  const dots = document.querySelectorAll('#lockDots .lock-dot');
+  dots.forEach(function(d, i){
+    d.classList.toggle('filled', i < pinBuffer.length);
+    d.classList.toggle('error', !!errorState);
+  });
+}
+function pressPinDigit(d){
+  if(pinBuffer.length>=4) return;
+  pinBuffer += d;
+  updatePinDots(false);
+  if(pinBuffer.length===4){ setTimeout(checkPin, 120); }
+}
+function backspacePin(){
+  pinBuffer = pinBuffer.slice(0,-1);
+  updatePinDots(false);
+}
+function checkPin(){
+  if(pinBuffer === (DB.settings.pin||'0000')){
+    unlockApp();
+  } else {
+    const dotsEl = document.getElementById('lockDots');
+    updatePinDots(true);
+    dotsEl.classList.add('shake');
+    setTimeout(function(){
+      dotsEl.classList.remove('shake');
+      pinBuffer = '';
+      updatePinDots(false);
+    }, 400);
+  }
+}
+function unlockApp(){
+  appLocked = false;
+  pinBuffer = '';
+  lastActivity = Date.now();
+  document.getElementById('lockOverlay').classList.add('hidden');
+}
+function lockApp(){
+  appLocked = true;
+  pinBuffer = '';
+  updatePinDots(false);
+  document.getElementById('lockOverlay').classList.remove('hidden');
+}
+function markActivity(){ lastActivity = Date.now(); }
+document.addEventListener('touchstart', markActivity, {passive:true});
+document.addEventListener('mousedown', markActivity);
+document.addEventListener('keydown', markActivity);
+setInterval(function(){
+  if(!appLocked && (Date.now()-lastActivity) > INACTIVITY_MS){ lockApp(); }
+}, 10000);
+function changePin(){
+  const cur = document.getElementById('pinCurrent').value.trim();
+  const nw = document.getElementById('pinNew').value.trim();
+  const cf = document.getElementById('pinConfirm').value.trim();
+  if(cur !== (DB.settings.pin||'0000')){ alert(t('settings.pinWrong')); return; }
+  if(!/^\d{4}$/.test(nw)){ alert(t('settings.pinInvalid')); return; }
+  if(nw !== cf){ alert(t('settings.pinMismatch')); return; }
+  DB.settings.pin = nw;
+  save();
+  document.getElementById('pinCurrent').value = '';
+  document.getElementById('pinNew').value = '';
+  document.getElementById('pinConfirm').value = '';
+  alert(t('settings.pinSaved'));
+}
+const headerLogoImg = document.querySelector('.drop-badge img');
+if(headerLogoImg){ document.getElementById('lockLogoImg').src = headerLogoImg.src; }
+
+applyStaticI18n();
+renderAll();
+</script>
+</body>
+</html>
