@@ -737,9 +737,6 @@ async function pullJobStatuses(){
       if(rj.status === 'done'){
         local.completedNotes = rj.completed_notes || '';
         local.completedAt = rj.completed_at || '';
-        // job-form.html lets the technician correct the final amount on-site (e.g. extra
-        // parts needed); pick that up too so the invoice reflects what was actually charged.
-        if(typeof rj.amount === 'number' && rj.amount !== local.amount) local.amount = rj.amount;
         const c = DB.customers.find(function(x){return x.id===local.custId;});
         if(c) c.lastService = local.date;
       }
@@ -774,7 +771,7 @@ const TR = {
     'tech.nameRequired':'Nama diperlukan', 'tech.jobsDone':' job selesai', 'tech.emptyTitle':'Belum ada juruteknik', 'tech.emptySub':'Tambah juruteknik yang klien anda hantar job kepada.',
     'job.editTitle':'Kemaskini job', 'job.addTitle':'Job baharu', 'job.customer':'Pelanggan', 'job.technician':'Juruteknik', 'job.techCommission':'Komisen juruteknik untuk job ini (RM)', 'job.techCommissionPh':'cth: 50', 'job.unassigned':'Belum ditugaskan',
     'job.date':'Tarikh servis', 'job.status':'Status', 'job.new':'Baharu', 'job.assigned':'Ditugaskan', 'job.inProgress':'Sedang berjalan', 'job.done':'Selesai', 'job.cancelled':'Dibatalkan',
-    'job.amount':'Jumlah dikenakan kepada pelanggan (RM)', 'job.notes':'Nota', 'job.completedNotes':'Dilaporkan oleh juruteknik', 'job.appointment':'Temujanji (ditetapkan oleh juruteknik)', 'job.save':'Simpan job', 'job.sendWhatsapp':'Hantar kepada juruteknik melalui WhatsApp', 'job.needSyncFirst':'Sync job ini dahulu sebelum hantar link laporan.',
+    'job.amount':'Jumlah dikenakan kepada pelanggan (RM)', 'job.notes':'Nota', 'job.completedNotes':'Dilaporkan oleh juruteknik', 'job.appointment':'Temujanji (ditetapkan oleh juruteknik)', 'job.apptBadge':'📅 Temujanji:', 'job.save':'Simpan job', 'job.sendWhatsapp':'Hantar kepada juruteknik melalui WhatsApp', 'job.needSyncFirst':'Sync job ini dahulu sebelum hantar link laporan.',
     'jf.sendLink':'Hantar link laporan kerja', 'jf.msg':'Sila isi laporan kerja selepas siap, tekan Hantar:',
     'job.delete':'Padam job', 'job.confirmDelete':'Padam job ini?', 'job.needCustomer':'Tambah pelanggan dahulu.', 'job.amountRequired':'Sila masukkan jumlah yang sah.', 'job.needTechPhone':'Tetapkan juruteknik dengan nombor telefon dahulu.',
     'job.emptyTitle':'Belum ada job', 'job.emptySub':'Tekan + untuk cipta job dan tugaskan juruteknik.', 'job.emptySubDash':'Cipta job pertama anda dari tab Job.',
@@ -820,7 +817,7 @@ const TR = {
     'tech.nameRequired':'Name is required', 'tech.jobsDone':' jobs completed', 'tech.emptyTitle':'No technicians yet', 'tech.emptySub':'Add the technicians your client dispatches jobs to.',
     'job.editTitle':'Edit job', 'job.addTitle':'New job', 'job.customer':'Customer', 'job.technician':'Technician', 'job.techCommission':'Technician commission for this job (RM)', 'job.techCommissionPh':'e.g. 50', 'job.unassigned':'Unassigned',
     'job.date':'Service date', 'job.status':'Status', 'job.new':'New', 'job.assigned':'Assigned', 'job.inProgress':'In progress', 'job.done':'Done', 'job.cancelled':'Cancelled',
-    'job.amount':'Amount charged to customer (RM)', 'job.notes':'Notes', 'job.completedNotes':'Reported by technician', 'job.appointment':'Appointment (set by technician)', 'job.save':'Save job', 'job.sendWhatsapp':'Send to technician via WhatsApp', 'job.needSyncFirst':'Sync this job first before sending the report link.',
+    'job.amount':'Amount charged to customer (RM)', 'job.notes':'Notes', 'job.completedNotes':'Reported by technician', 'job.appointment':'Appointment (set by technician)', 'job.apptBadge':'📅 Appointment:', 'job.save':'Save job', 'job.sendWhatsapp':'Send to technician via WhatsApp', 'job.needSyncFirst':'Sync this job first before sending the report link.',
     'jf.sendLink':'Send job report link', 'jf.msg':'Please fill in the job report once done, then tap Send:',
     'job.delete':'Delete job', 'job.confirmDelete':'Delete this job?', 'job.needCustomer':'Add a customer first.', 'job.amountRequired':'Please enter a valid amount.', 'job.needTechPhone':'Assign a technician with a phone number first.',
     'job.emptyTitle':'No jobs yet', 'job.emptySub':'Tap + to create a job and assign a technician.', 'job.emptySubDash':'Create your first job from the Jobs tab.',
@@ -934,17 +931,27 @@ function nextCustCode(){ return String(DB.custSeq++).padStart(3,'0'); }
 function fmtMoney(n){ return 'RM' + (Math.round((n||0)*100)/100).toLocaleString('en-MY',{minimumFractionDigits:0}); }
 function todayISO(){ return new Date().toISOString().slice(0,10); }
 function daysBetween(a,b){ return Math.round((new Date(b) - new Date(a)) / 86400000); }
+// Hardcoded month names instead of relying on the browser's toLocaleDateString ICU data —
+// Android's built-in ms-MY locale data is inconsistent across devices (some abbreviate
+// "Ogos" down to "Ogo", which isn't a real Malay abbreviation). This makes date text
+// deterministic regardless of device/browser locale data.
+const MONTHS_BM = ['Jan','Feb','Mac','Apr','Mei','Jun','Jul','Ogos','Sep','Okt','Nov','Dis'];
+const MONTHS_EN = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 function fmtDate(d){
   if(!d) return '—';
   const dt = new Date(d+'T00:00:00');
-  return dt.toLocaleDateString(LANG==='ms'?'ms-MY':'en-GB',{day:'numeric',month:'short',year:'numeric'});
+  const months = LANG==='ms' ? MONTHS_BM : MONTHS_EN;
+  return dt.getDate() + ' ' + months[dt.getMonth()] + ' ' + dt.getFullYear();
 }
 function fmtDateTime(iso){
   if(!iso) return '—';
   const dt = new Date(iso);
   if(isNaN(dt)) return '—';
-  return dt.toLocaleDateString(LANG==='ms'?'ms-MY':'en-GB',{day:'numeric',month:'short',year:'numeric'}) +
-    ', ' + dt.toLocaleTimeString(LANG==='ms'?'ms-MY':'en-GB',{hour:'2-digit',minute:'2-digit'});
+  const months = LANG==='ms' ? MONTHS_BM : MONTHS_EN;
+  const h = dt.getHours(), m = String(dt.getMinutes()).padStart(2,'0');
+  const h12 = ((h % 12) || 12);
+  const ampm = h < 12 ? 'AM' : 'PM';
+  return dt.getDate() + ' ' + months[dt.getMonth()] + ' ' + dt.getFullYear() + ', ' + h12 + ':' + m + ' ' + ampm;
 }
 
 /* ---------- LANGUAGE ---------- */
@@ -1759,10 +1766,12 @@ function renderJobs(){
     const c = DB.customers.find(function(x){return x.id===j.custId;});
     const tc = DB.technicians.find(function(x){return x.id===j.techId;});
     const comm = jobTechCommission(j);
+    const showAppt = j.appointmentAt && j.status!=='done' && j.status!=='cancelled';
     return '<div class="card" onclick="openJobForm(\''+j.id+'\')">' +
       '<div class="row"><div>' +
         '<div class="name">'+(c?esc(c.name):t('job.deletedCustomer'))+'</div>' +
         '<div class="sub">'+(tc?esc(tc.name):t('job.unassigned'))+' · '+fmtDate(j.date)+'</div>' +
+        (showAppt ? '<div class="sub"><span class="badge warn">'+t('job.apptBadge')+' '+fmtDateTime(j.appointmentAt)+'</span></div>' : '') +
         '<div class="sub">'+fmtMoney(j.amount)+t('job.charged')+fmtMoney(comm)+t('job.forTech')+fmtMoney(PLATFORM_FEE_PER_JOB)+t('job.platformFee')+fmtMoney(j.amount-comm-PLATFORM_FEE_PER_JOB)+t('job.forYou')+'</div>' +
         (j.invoiceNo ? '<div class="sub">'+j.invoiceNo+'</div>' : '') +
       '</div>'+statusBadge(j.status)+'</div></div>';
