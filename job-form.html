@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Laporan Kerja — Nizam Service & Repair</title>
+<style>
+  :root{
+    --ink:#152623; --ink-soft:#4b615c; --bg:#F5F3EC; --panel:#FFFFFF; --line:#DCE0D6;
+    --teal:#0E4F4A; --teal-deep:#0A3A37; --teal-tint:#E4EFEC;
+    --ok:#2F7D4F; --ok-tint:#E3F2E6; --bad:#B4392E; --bad-tint:#F8E3E0;
+    --radius:10px;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg); color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{ max-width:480px; margin:0 auto; padding:20px 16px 40px; }
+  h1{ font-family:Georgia,Cambria,serif; font-size:19px; color:var(--teal-deep); margin:4px 0 2px; }
+  .sub{ color:var(--ink-soft); font-size:13px; margin-bottom:18px; }
+  .card{ background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:16px; margin-bottom:14px; }
+  .info-row{ display:flex; justify-content:space-between; gap:12px; padding:6px 0; font-size:14px; border-bottom:1px solid var(--line); }
+  .info-row:last-child{ border-bottom:none; }
+  .info-row .k{ color:var(--ink-soft); }
+  .info-row .v{ font-weight:600; text-align:right; }
+  label{ display:block; font-size:13px; color:var(--ink-soft); margin:14px 0 6px; }
+  label:first-child{ margin-top:0; }
+  input,textarea,select{
+    width:100%; padding:10px 12px; border:1px solid var(--line); border-radius:8px;
+    font-size:15px; font-family:inherit; background:var(--bg); color:var(--ink);
+  }
+  textarea{ resize:vertical; min-height:70px; }
+  .status-choice{ display:flex; gap:8px; }
+  .status-choice label{
+    flex:1; margin:0; display:flex; align-items:center; justify-content:center;
+    padding:12px 8px; border:1px solid var(--line); border-radius:8px; background:var(--panel);
+    font-size:14px; font-weight:600; color:var(--ink); cursor:pointer;
+  }
+  .status-choice input{ display:none; width:auto; }
+  .status-choice input:checked + span{ color:var(--teal-deep); }
+  .status-choice label.sel{ border-color:var(--teal); background:var(--teal-tint); }
+  .btn{
+    display:block; width:100%; padding:14px; border:none; border-radius:8px;
+    font-size:16px; font-weight:700; margin-top:18px; cursor:pointer;
+  }
+  .btn-primary{ background:var(--teal-deep); color:#fff; }
+  .btn-primary:disabled{ opacity:0.5; }
+  .btn-ghost{ background:transparent; color:var(--teal-deep); border:1px solid var(--line); margin-top:10px; }
+  .btn-ghost:disabled{ opacity:0.5; }
+  .center{ text-align:center; padding:40px 16px; }
+  .icon-circle{
+    width:56px; height:56px; border-radius:50%; margin:0 auto 16px;
+    display:flex; align-items:center; justify-content:center; font-size:28px;
+  }
+  .ok-circle{ background:var(--ok-tint); color:var(--ok); }
+  .bad-circle{ background:var(--bad-tint); color:var(--bad); }
+  .hidden{ display:none; }
+</style>
+</head>
+<body>
+<div class="wrap" id="app">
+  <div class="center"><div class="sub">Loading...</div></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// Same Supabase project Nizamcrm.html and Nizamtech.html use. No login/PIN here on
+// purpose — the link itself (job id in the URL) is the only credential, and the
+// submit_job_form() RPC only ever touches the single job row matching that id.
+const SB_URL = 'https://jtlmhmlbehdaerwoqivu.supabase.co';
+const SB_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp0bG1obWxiZWhkYWVyd29xaXZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUxODc2MzIsImV4cCI6MjEwMDc2MzYzMn0.z2HK2acnYQh-3OzUS3pe74X9TC8nBt9L3eCpki2pnaM';
+const sb = window.supabase.createClient(SB_URL, SB_ANON_KEY);
+
+function esc(s){ return (s==null?'':String(s)).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function fmtMoney(n){ return 'RM ' + (Number(n)||0).toFixed(2); }
+
+function getJobId(){
+  const params = new URLSearchParams(window.location.search);
+  return params.get('job');
+}
+
+function renderError(msg){
+  document.getElementById('app').innerHTML =
+    '<div class="center">' +
+      '<div class="icon-circle bad-circle">!</div>' +
+      '<h1>Link tidak sah</h1>' +
+      '<div class="sub">' + esc(msg) + '</div>' +
+    '</div>';
+}
+
+function renderLocked(job){
+  document.getElementById('app').innerHTML =
+    '<div class="center">' +
+      '<div class="icon-circle ok-circle">&#10003;</div>' +
+      '<h1>Laporan sudah dihantar</h1>' +
+      '<div class="sub">Laporan untuk job ini sudah direkodkan. Sila hubungi pejabat jika perlu buat pembetulan.</div>' +
+      '<div class="card" style="text-align:left;margin-top:20px;">' +
+        '<div class="info-row"><span class="k">Pelanggan</span><span class="v">' + esc(job.customer_name) + '</span></div>' +
+        (job.appointment_at ? '<div class="info-row"><span class="k">Temujanji</span><span class="v">' + esc(fmtDateTime(job.appointment_at)) + '</span></div>' : '') +
+        '<div class="info-row"><span class="k">Status</span><span class="v">' + esc(statusLabel(job.status)) + '</span></div>' +
+        '<div class="info-row"><span class="k">Jumlah</span><span class="v">' + fmtMoney(job.amount) + '</span></div>' +
+      '</div>' +
+    '</div>';
+}
+
+function fmtDateTime(iso){
+  const d = new Date(iso);
+  if(isNaN(d)) return iso;
+  return d.toLocaleDateString('ms-MY', {day:'numeric', month:'short', year:'numeric'}) +
+    ', ' + d.toLocaleTimeString('ms-MY', {hour:'2-digit', minute:'2-digit'});
+}
+
+// Converts an ISO timestamp to the "YYYY-MM-DDTHH:mm" format <input type="datetime-local">
+// expects, in the technician's local time (so the prefilled value matches what they'd
+// see on a clock, not a UTC-shifted one).
+function toLocalInputValue(iso){
+  const d = new Date(iso);
+  if(isNaN(d)) return '';
+  const pad = function(n){ return String(n).padStart(2,'0'); };
+  return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate()) +
+    'T' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+}
+
+function statusLabel(s){
+  return { done:'Selesai', cancelled:'Tidak dapat diselesaikan', in_progress:'Sedang dijalankan', assigned:'Ditugaskan', new:'Baru' }[s] || s;
+}
+
+function renderForm(job, jobId){
+  document.getElementById('app').innerHTML =
+    '<h1>Laporan Kerja</h1>' +
+    '<div class="sub">Isi borang ini selepas kerja siap, kemudian tekan Hantar.</div>' +
+    '<div class="card">' +
+      '<div class="info-row"><span class="k">Pelanggan</span><span class="v">' + esc(job.customer_name) + '</span></div>' +
+      (job.customer_address ? '<div class="info-row"><span class="k">Alamat</span><span class="v">' + esc(job.customer_address) + '</span></div>' : '') +
+      (job.notes ? '<div class="info-row"><span class="k">Butiran</span><span class="v">' + esc(job.notes) + '</span></div>' : '') +
+    '</div>' +
+    '<div class="card">' +
+      '<label>Bila anda boleh datang?</label>' +
+      (job.appointment_at ? '<div class="sub" style="margin:-4px 0 10px;">Ditetapkan buat masa ini: ' + esc(fmtDateTime(job.appointment_at)) + '</div>' : '') +
+      '<input type="datetime-local" id="jfAppt" value="' + (job.appointment_at ? toLocalInputValue(job.appointment_at) : '') + '">' +
+      '<button class="btn btn-ghost" id="jfApptSave">' + (job.appointment_at ? 'Kemaskini temujanji' : 'Sahkan temujanji') + '</button>' +
+    '</div>' +
+    '<div class="card">' +
+      '<label>Status</label>' +
+      '<div class="status-choice" id="statusChoice">' +
+        '<label class="sel" data-val="done"><input type="radio" name="jfStatus" value="done" checked><span>Selesai</span></label>' +
+        '<label data-val="cancelled"><input type="radio" name="jfStatus" value="cancelled"><span>Tak dapat selesai</span></label>' +
+      '</div>' +
+      '<label>Apa yang telah dibaiki / ditukar</label>' +
+      '<textarea id="jfNotes" placeholder="Cth: Tukar cartridge, servis unit..."></textarea>' +
+      '<label>Jumlah akhir dikenakan kepada pelanggan (RM)</label>' +
+      '<input type="number" id="jfAmount" inputmode="decimal" value="' + (job.amount||'') + '">' +
+      '<button class="btn btn-primary" id="jfSubmit">Hantar</button>' +
+    '</div>';
+
+  document.getElementById('jfApptSave').addEventListener('click', async function(){
+    const btn = this;
+    const val = document.getElementById('jfAppt').value;
+    if(!val){ alert('Sila pilih tarikh dan masa dahulu.'); return; }
+    const iso = new Date(val).toISOString();
+    btn.disabled = true;
+    const label = btn.textContent;
+    btn.textContent = 'Menyimpan...';
+    try{
+      const { data, error } = await sb.rpc('set_job_appointment', { p_id: jobId, p_appointment_at: iso });
+      if(error || data === false){
+        alert('Gagal simpan temujanji. Sila cuba lagi.');
+      }else{
+        job.appointment_at = iso;
+        alert('Temujanji disahkan.');
+        btn.textContent = 'Kemaskini temujanji';
+      }
+    }catch(e){
+      alert('Gagal simpan temujanji. Sila cuba lagi.');
+    }
+    btn.disabled = false;
+    if(btn.textContent === 'Menyimpan...') btn.textContent = label;
+  });
+
+  document.getElementById('statusChoice').addEventListener('click', function(e){
+    const lbl = e.target.closest('label');
+    if(!lbl) return;
+    document.querySelectorAll('#statusChoice label').forEach(function(l){ l.classList.remove('sel'); });
+    lbl.classList.add('sel');
+  });
+
+  document.getElementById('jfSubmit').addEventListener('click', async function(){
+    const btn = this;
+    const status = document.querySelector('#statusChoice input:checked').value;
+    const notes = document.getElementById('jfNotes').value.trim();
+    const amountVal = document.getElementById('jfAmount').value;
+    const amount = amountVal === '' ? null : parseFloat(amountVal);
+
+    if(status === 'done' && !notes){
+      alert('Sila nyatakan apa yang telah dibaiki/ditukar.');
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Menghantar...';
+    try{
+      const { data, error } = await sb.rpc('submit_job_form', {
+        p_id: jobId, p_status: status, p_completed_notes: notes || null, p_final_amount: amount
+      });
+      if(error || data === false){
+        alert('Gagal menghantar. Sila cuba lagi atau hubungi pejabat.');
+        btn.disabled = false;
+        btn.textContent = 'Hantar';
+        return;
+      }
+      job.status = status; job.amount = amount != null ? amount : job.amount;
+      renderLocked(job);
+    }catch(e){
+      alert('Gagal menghantar. Sila cuba lagi atau hubungi pejabat.');
+      btn.disabled = false;
+      btn.textContent = 'Hantar';
+    }
+  });
+}
+
+async function init(){
+  const jobId = getJobId();
+  if(!jobId){ renderError('Tiada job dikenal pasti dalam link ini.'); return; }
+  const { data, error } = await sb.rpc('get_job_for_form', { p_id: jobId });
+  if(error || !data || !data.length){ renderError('Job tidak dijumpai. Sila semak link atau hubungi pejabat.'); return; }
+  const job = data[0];
+  if(job.form_locked){ renderLocked(job); return; }
+  renderForm(job, jobId);
+}
+init();
+</script>
+</body>
+</html>
