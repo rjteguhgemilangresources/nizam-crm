@@ -106,11 +106,17 @@ function renderLocked(job){
     '</div>';
 }
 
+// Hardcoded month names instead of relying on the browser's toLocaleDateString ICU data —
+// Android's built-in ms-MY locale data is inconsistent across devices (some abbreviate
+// "Ogos" down to "Ogo", which isn't a real Malay abbreviation).
+const MONTHS_BM = ['Jan','Feb','Mac','Apr','Mei','Jun','Jul','Ogos','Sep','Okt','Nov','Dis'];
 function fmtDateTime(iso){
   const d = new Date(iso);
   if(isNaN(d)) return iso;
-  return d.toLocaleDateString('ms-MY', {day:'numeric', month:'short', year:'numeric'}) +
-    ', ' + d.toLocaleTimeString('ms-MY', {hour:'2-digit', minute:'2-digit'});
+  const h = d.getHours(), m = String(d.getMinutes()).padStart(2,'0');
+  const h12 = ((h % 12) || 12);
+  const ampm = h < 12 ? 'AM' : 'PM';
+  return d.getDate() + ' ' + MONTHS_BM[d.getMonth()] + ' ' + d.getFullYear() + ', ' + h12 + ':' + m + ' ' + ampm;
 }
 
 // Converts an ISO timestamp to the "YYYY-MM-DDTHH:mm" format <input type="datetime-local">
@@ -151,8 +157,6 @@ function renderForm(job, jobId){
       '</div>' +
       '<label>Apa yang telah dibaiki / ditukar</label>' +
       '<textarea id="jfNotes" placeholder="Cth: Tukar cartridge, servis unit..."></textarea>' +
-      '<label>Jumlah akhir dikenakan kepada pelanggan (RM)</label>' +
-      '<input type="number" id="jfAmount" inputmode="decimal" value="' + (job.amount||'') + '">' +
       '<button class="btn btn-primary" id="jfSubmit">Hantar</button>' +
     '</div>';
 
@@ -191,8 +195,6 @@ function renderForm(job, jobId){
     const btn = this;
     const status = document.querySelector('#statusChoice input:checked').value;
     const notes = document.getElementById('jfNotes').value.trim();
-    const amountVal = document.getElementById('jfAmount').value;
-    const amount = amountVal === '' ? null : parseFloat(amountVal);
 
     if(status === 'done' && !notes){
       alert('Sila nyatakan apa yang telah dibaiki/ditukar.');
@@ -202,8 +204,10 @@ function renderForm(job, jobId){
     btn.disabled = true;
     btn.textContent = 'Menghantar...';
     try{
+      // Amount is set by the office, not the technician — always pass null so
+      // submit_job_form's coalesce(p_final_amount, amount) leaves it untouched.
       const { data, error } = await sb.rpc('submit_job_form', {
-        p_id: jobId, p_status: status, p_completed_notes: notes || null, p_final_amount: amount
+        p_id: jobId, p_status: status, p_completed_notes: notes || null, p_final_amount: null
       });
       if(error || data === false){
         alert('Gagal menghantar. Sila cuba lagi atau hubungi pejabat.');
@@ -211,7 +215,7 @@ function renderForm(job, jobId){
         btn.textContent = 'Hantar';
         return;
       }
-      job.status = status; job.amount = amount != null ? amount : job.amount;
+      job.status = status;
       renderLocked(job);
     }catch(e){
       alert('Gagal menghantar. Sila cuba lagi atau hubungi pejabat.');
