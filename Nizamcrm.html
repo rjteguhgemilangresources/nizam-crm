@@ -600,6 +600,7 @@ async function syncNow(){
   setSyncStatus(t('sync.inProgress'));
   try{
     await pullTechnicians();
+    await pullCustomers();
     await pushCustomers();
     await pushJobs();
     await pullJobStatuses();
@@ -667,6 +668,42 @@ async function pullTechnicians(){
   });
 }
 
+// Pulls the FULL customer list down — needed so a device opening this CRM for the first
+// time (e.g. a second admin, or a phone that's never synced before) actually gets existing
+// customers instead of starting empty. Matches by supabaseId first; falls back to matching
+// an unsynced local record by phone (same pattern as pullTechnicians), so a customer typed
+// in independently on two devices before ever syncing merges into one record instead of
+// duplicating. Otherwise creates a brand-new local record.
+async function pullCustomers(){
+  const { data, error } = await sbCloud.rpc('list_customers');
+  if(error){ console.error('pullCustomers failed', error); lastSyncErrors.push('pullCustomers: '+(error.message||JSON.stringify(error))); return; }
+  if(!data) return;
+  data.forEach(function(rc){
+    let local = DB.customers.find(function(x){ return x.supabaseId===rc.id; });
+    if(!local){
+      local = DB.customers.find(function(x){
+        return !x.supabaseId && x.phone && rc.phone && x.phone.replace(/[^0-9]/g,'')===rc.phone.replace(/[^0-9]/g,'');
+      });
+    }
+    if(local){
+      local.supabaseId = rc.id;
+      // Don't clobber a local edit that hasn't been pushed up yet.
+      if(!local._dirty){
+        local.name = rc.name; local.phone = rc.phone||''; local.address = rc.address||'';
+        local.area = rc.area||''; local.brand = rc.brand||''; local.model = rc.model||'';
+        local.lastService = rc.last_service_date||''; local.recurring = rc.recurring!==false;
+        local.notes = rc.notes||'';
+      }
+    } else {
+      DB.customers.push({
+        id: nextId(), supabaseId: rc.id, name: rc.name, phone: rc.phone||'',
+        address: rc.address||'', area: rc.area||'', brand: rc.brand||'', model: rc.model||'',
+        lastService: rc.last_service_date||'', recurring: rc.recurring!==false, notes: rc.notes||''
+      });
+    }
+  });
+}
+
 // Pushes new/changed customers up so jobs assigned to a technician carry real customer info.
 async function pushCustomers(){
   for(const c of DB.customers){
@@ -720,14 +757,31 @@ async function pushJobs(){
 // and marking it done, including what they logged as done/changed — and reflects it on the
 // matching local job. Admin-set statuses (new/assigned/cancelled) are left alone here; only
 // the technician-driven states flow back in.
+// Pulls back job statuses/completions the technician-facing side (start_job/complete_job/
+// job-form.html) has changed — AND, for a device that's never seen a given job before
+// (e.g. a fresh device, a second admin), creates it locally so the job actually shows up
+// instead of silently never appearing. Requires the job's customer to already exist locally
+// (via pullCustomers, which runs earlier in syncNow) — if not, it's skipped this pass and
+// picked up on the next one once the customer has synced.
 async function pullJobStatuses(){
   const { data, error } = await sbCloud.rpc('list_jobs');
   if(error){ console.error('pullJobStatuses failed', error); lastSyncErrors.push('pullJobStatuses: '+(error.message||JSON.stringify(error))); return; }
   if(!data) return;
   const techDriven = { in_progress:true, done:true };
   data.forEach(function(rj){
-    const local = DB.jobs.find(function(x){ return x.supabaseId===rj.id; });
-    if(!local) return;
+    let local = DB.jobs.find(function(x){ return x.supabaseId===rj.id; });
+    if(!local){
+      const localCust = DB.customers.find(function(x){ return x.supabaseId===rj.customer_id; });
+      if(!localCust) return;
+      const localTech = DB.technicians.find(function(x){ return x.supabaseId===rj.technician_id; });
+      DB.jobs.push({
+        id: nextId(), supabaseId: rj.id, custId: localCust.id, techId: localTech?localTech.id:null,
+        date: rj.job_date, status: rj.status, amount: rj.amount||0, notes: rj.notes||'',
+        completedNotes: rj.completed_notes||'', completedAt: rj.completed_at||'',
+        invoiceNo: rj.invoice_no||'', techComm: rj.tech_commission||0, appointmentAt: rj.appointment_at||null
+      });
+      return;
+    }
     if(typeof rj.tech_commission === 'number') local.techComm = rj.tech_commission;
     // Appointment can be set/changed by the technician any time before the form locks
     // (independent of status), so this isn't gated by techDriven/status like the rest.
