@@ -463,6 +463,7 @@
 
   <!-- TECHNICIANS -->
   <div class="view" id="view-technicians">
+    <input class="search" id="techSearch" data-t-ph="search.technicians">
     <div id="techList"></div>
   </div>
 
@@ -606,6 +607,7 @@ async function syncNow(){
   try{
     await pullTechnicians();
     await pullCustomers();
+    await pushTechnicians();
     await pushCustomers();
     await pushJobs();
     await pullJobStatuses();
@@ -658,6 +660,7 @@ async function pullTechnicians(){
       local.phone = rt.phone;
       if(!local.area && rt.coverage_area) local.area = rt.coverage_area;
       if(!local.skills && rt.skills) local.skills = rt.skills;
+      if(!local.state && rt.state) local.state = rt.state;
       // This technician just registered (wasn't linked before) — any job already assigned
       // to them locally was pushed as "unassigned" up to now, since Supabase had no matching
       // technician row to attach it to. Flag those jobs so the next push actually links them,
@@ -668,7 +671,7 @@ async function pullTechnicians(){
     } else {
       DB.technicians.push({
         id: nextId(), supabaseId: rt.id, name: rt.name, phone: rt.phone,
-        area: rt.coverage_area||'', skills: rt.skills||'',
+        area: rt.coverage_area||'', skills: rt.skills||'', state: rt.state||'',
         commType: rt.commission_type||'percent', rate: rt.commission_value||0
       });
     }
@@ -709,6 +712,45 @@ async function pullCustomers(){
       });
     }
   });
+}
+
+// Pushes new/changed technicians up. A technician created directly through the CRM's "Add
+// technician" form previously never reached Supabase at all — there was no insert call, only
+// updates for technicians that already had a supabaseId (i.e. had self-registered on
+// Nizamtech.html first). That technician now gets inserted as a *placeholder* row (no PIN set
+// yet — pin_hash left null server-side), so they show up on every synced device right away.
+// If that same person later self-registers on Nizamtech.html with the matching phone number,
+// register_technician() (Supabase-side, Phase 12) claims this placeholder row and sets the
+// PIN on it, instead of blocking them or creating a duplicate technician.
+// A technician with no phone on file is skipped — phone is required/unique in Supabase, and
+// there'd be no way to match their eventual self-registration to this row anyway.
+async function pushTechnicians(){
+  for(const tc of DB.technicians){
+    if(tc.supabaseId && !tc._dirty) continue;
+    if(!tc.phone) continue;
+    if(tc.supabaseId){
+      const { error } = await sbCloud.rpc('update_technician_profile', {
+        p_id: tc.supabaseId, p_coverage_area: tc.area||null, p_skills: tc.skills||null,
+        p_commission_type: tc.commType, p_commission_value: tc.rate||0, p_state: tc.state||null
+      });
+      if(!error){ delete tc._dirty; }
+      else{
+        console.error('pushTechnicians (update) failed for', tc.name, error);
+        lastSyncErrors.push('Technician "'+tc.name+'": '+(error.message||JSON.stringify(error)));
+      }
+    } else {
+      const { data, error } = await sbCloud.rpc('insert_technician_placeholder', {
+        p_name: tc.name, p_phone: tc.phone, p_coverage_area: tc.area||null,
+        p_skills: tc.skills||null, p_commission_type: tc.commType,
+        p_commission_value: tc.rate||0, p_state: tc.state||null
+      });
+      if(!error && data){ tc.supabaseId = data; delete tc._dirty; }
+      else if(error){
+        console.error('pushTechnicians (insert) failed for', tc.name, error);
+        lastSyncErrors.push('Technician "'+tc.name+'": '+(error.message||JSON.stringify(error)));
+      }
+    }
+  }
 }
 
 // Pushes new/changed customers up so jobs assigned to a technician carry real customer info.
@@ -862,7 +904,7 @@ const TR = {
   ms: {
     'stat.pending':'Job terbuka', 'stat.due':'Akan tamat 7 hari', 'stat.revenue':'Kasar (bulan ini)', 'stat.profit':'Bersih (bulan ini)',
     'section.attention':'Perlu perhatian', 'section.recent':'Job terkini',
-    'search.jobs':'Cari job ikut pelanggan atau juruteknik...', 'search.customers':'Cari pelanggan ikut kod, nama, telefon, kawasan...',
+    'search.jobs':'Cari job ikut pelanggan atau juruteknik...', 'search.customers':'Cari pelanggan ikut kod, nama, telefon, kawasan...', 'search.technicians':'Cari juruteknik ikut nama, negeri, kawasan...', 'search.noResults':'Tiada hasil dijumpai.',
     'report.title':'Laporan kewangan bulanan', 'report.desc':'Semak untung kasar dan untung bersih bagi bulan pilihan.', 'report.month':'Pilih bulan', 'report.jobsCompleted':'Job selesai', 'report.revenue':'Jumlah kutipan', 'report.techPayouts':'Bayaran juruteknik', 'report.grossProfit':'Untung kasar', 'report.systemFees':'Yuran sistem', 'report.netProfit':'Untung bersih',
     'sync.title':'Segerak dengan juruteknik', 'sync.desc':'Segerak automatik setiap 15 saat semasa app dibuka. Tarik senarai juruteknik berdaftar, hantar job/pelanggan ke cloud, dan tarik status job.', 'sync.btn':'Segerak sekarang',
     'inv.recordsTitle':'Rekod invois', 'inv.recordsDesc':'Rekod setiap invois yang telah dihantar. Disegerak merentasi semua peranti.', 'inv.recordsEmpty':'Tiada invois direkodkan lagi.', 'inv.recordsDelete':'Padam', 'inv.recordsConfirmDelete':'Padam rekod invois ini? Ini hanya memadam rekod — job dan invois itu sendiri tidak akan dipadam.',
@@ -881,12 +923,13 @@ const TR = {
     'cust.nameRequired':'Nama diperlukan', 'cust.noHistory':'Tiada rekod servis', 'cust.overdue':'Tertunggak — ', 'cust.dueSoon':'Akan tamat: ', 'cust.upcoming':'Servis akan datang: ',
     'cust.emptyTitle':'Belum ada pelanggan', 'cust.emptySub':'Tambah pelanggan klien anda apabila lead masuk.',
     'tech.editTitle':'Kemaskini juruteknik', 'tech.addTitle':'Tambah juruteknik', 'tech.name':'Nama', 'tech.phone':'Telefon (untuk hantar WhatsApp)',
-    'tech.area':'Kawasan liputan', 'tech.areaPh':'cth: Shah Alam, Klang', 'tech.skills':'Kepakaran / Skill',
+    'tech.area':'Kawasan liputan', 'tech.areaPh':'cth: Shah Alam, Klang', 'tech.state':'Negeri', 'tech.skills':'Kepakaran / Skill',
     'tech.rate':'Komisen lalai setiap job (RM)', 'tech.ratePh':'cth: 40', 'tech.save':'Simpan juruteknik', 'tech.delete':'Padam juruteknik', 'tech.confirmDelete':'Padam juruteknik ini?',
     'tech.nameRequired':'Nama diperlukan', 'tech.jobsDone':' job selesai', 'tech.emptyTitle':'Belum ada juruteknik', 'tech.emptySub':'Tambah juruteknik yang klien anda hantar job kepada.',
     'job.editTitle':'Kemaskini job', 'job.addTitle':'Job baharu', 'job.customer':'Pelanggan', 'job.technician':'Juruteknik', 'job.techCommission':'Komisen juruteknik untuk job ini (RM)', 'job.techCommissionPh':'cth: 50', 'job.unassigned':'Belum ditugaskan',
     'job.date':'Tarikh servis', 'job.status':'Status', 'job.new':'Baharu', 'job.assigned':'Ditugaskan', 'job.inProgress':'Sedang berjalan', 'job.done':'Selesai', 'job.cancelled':'Dibatalkan',
-    'job.amount':'Jumlah dikenakan kepada pelanggan (RM)', 'job.notes':'Nota', 'job.completedNotes':'Dilaporkan oleh juruteknik', 'job.doneAt':'Selesai pada', 'job.appointment':'Temujanji (ditetapkan oleh juruteknik)', 'job.apptBadge':'📅 Temujanji:', 'job.save':'Simpan job', 'job.sendWhatsapp':'Hantar kepada juruteknik melalui WhatsApp', 'job.needSyncFirst':'Sync job ini dahulu sebelum hantar link laporan.',
+    'job.amount':'Jumlah dikenakan kepada pelanggan (RM)', 'job.notes':'Nota', 'job.completedNotes':'Dilaporkan oleh juruteknik', 'job.doneAt':'Selesai pada', 'job.appointment':'Temujanji (ditetapkan oleh juruteknik)', 'job.apptBadge':'📅 Temujanji:', 'job.save':'Simpan job', 'job.sendWhatsapp':'Hantar kepada juruteknik melalui WhatsApp', 'job.needSyncFirst':'Sync job ini dahulu sebelum hantar link laporan.', 'job.needCustPhone':'Pelanggan ini tiada nombor telefon.',
+    'appt.sendToCust':'Hantar temujanji kepada pelanggan', 'appt.notSetYet':'Juruteknik belum tetapkan temujanji lagi.', 'appt.custMsgTitle':'Temujanji perkhidmatan disahkan:', 'appt.technician':'Juruteknik: ', 'appt.techPhone':'Telefon: ', 'appt.dateTime':'Tarikh/Masa: ',
     'jf.sendLink':'Hantar link laporan kerja', 'jf.msg':'Sila isi laporan kerja selepas siap, tekan Hantar:',
     'job.delete':'Padam job', 'job.confirmDelete':'Padam job ini?', 'job.needCustomer':'Tambah pelanggan dahulu.', 'job.amountRequired':'Sila masukkan jumlah yang sah.', 'job.needTechPhone':'Tetapkan juruteknik dengan nombor telefon dahulu.',
     'job.emptyTitle':'Belum ada job', 'job.emptySub':'Tekan + untuk cipta job dan tugaskan juruteknik.', 'job.emptySubDash':'Cipta job pertama anda dari tab Job.',
@@ -909,7 +952,7 @@ const TR = {
   en: {
     'stat.pending':'Open jobs', 'stat.due':'Due within 7 days', 'stat.revenue':'Kasar / gross (this month)', 'stat.profit':'Bersih / net (this month)',
     'section.attention':'Needs attention', 'section.recent':'Recent jobs',
-    'search.jobs':'Search jobs by customer or technician...', 'search.customers':'Search customers by code, name, phone, area...',
+    'search.jobs':'Search jobs by customer or technician...', 'search.customers':'Search customers by code, name, phone, area...', 'search.technicians':'Search technicians by name, state, area...', 'search.noResults':'No results found.',
     'report.title':'Monthly financial report', 'report.desc':'Check gross profit and net profit for the selected month.', 'report.month':'Select month', 'report.jobsCompleted':'Jobs completed', 'report.revenue':'Total revenue', 'report.techPayouts':'Technician payouts', 'report.grossProfit':'Gross profit', 'report.systemFees':'System fees', 'report.netProfit':'Net profit',
     'sync.title':'Sync with technicians', 'sync.desc':'Syncs automatically every 15 seconds while the app is open. Pulls in registered technicians, pushes jobs/customers to the cloud, and pulls back job status.', 'sync.btn':'Sync now',
     'inv.recordsTitle':'Invoice records', 'inv.recordsDesc':'A record of every invoice that has been sent out. Synced across all devices.', 'inv.recordsEmpty':'No invoices recorded yet.', 'inv.recordsDelete':'Delete', 'inv.recordsConfirmDelete':'Delete this invoice record? This only removes the log entry — the job and the invoice itself are not deleted.',
@@ -928,12 +971,13 @@ const TR = {
     'cust.nameRequired':'Name is required', 'cust.noHistory':'No service history', 'cust.overdue':'Overdue — ', 'cust.dueSoon':'Due soon: ', 'cust.upcoming':'Upcoming service: ',
     'cust.emptyTitle':'No customers yet', 'cust.emptySub':'Add your client\u2019s customers as leads come in.',
     'tech.editTitle':'Edit technician', 'tech.addTitle':'Add technician', 'tech.name':'Name', 'tech.phone':'Phone (for WhatsApp dispatch)',
-    'tech.area':'Coverage area', 'tech.areaPh':'e.g. Shah Alam, Klang', 'tech.skills':'Skills',
+    'tech.area':'Coverage area', 'tech.areaPh':'e.g. Shah Alam, Klang', 'tech.state':'State', 'tech.skills':'Skills',
     'tech.rate':'Default commission per job (RM)', 'tech.ratePh':'e.g. 40', 'tech.save':'Save technician', 'tech.delete':'Delete technician', 'tech.confirmDelete':'Delete this technician?',
     'tech.nameRequired':'Name is required', 'tech.jobsDone':' jobs completed', 'tech.emptyTitle':'No technicians yet', 'tech.emptySub':'Add the technicians your client dispatches jobs to.',
     'job.editTitle':'Edit job', 'job.addTitle':'New job', 'job.customer':'Customer', 'job.technician':'Technician', 'job.techCommission':'Technician commission for this job (RM)', 'job.techCommissionPh':'e.g. 50', 'job.unassigned':'Unassigned',
     'job.date':'Service date', 'job.status':'Status', 'job.new':'New', 'job.assigned':'Assigned', 'job.inProgress':'In progress', 'job.done':'Done', 'job.cancelled':'Cancelled',
-    'job.amount':'Amount charged to customer (RM)', 'job.notes':'Notes', 'job.completedNotes':'Reported by technician', 'job.doneAt':'Done at', 'job.appointment':'Appointment (set by technician)', 'job.apptBadge':'📅 Appointment:', 'job.save':'Save job', 'job.sendWhatsapp':'Send to technician via WhatsApp', 'job.needSyncFirst':'Sync this job first before sending the report link.',
+    'job.amount':'Amount charged to customer (RM)', 'job.notes':'Notes', 'job.completedNotes':'Reported by technician', 'job.doneAt':'Done at', 'job.appointment':'Appointment (set by technician)', 'job.apptBadge':'📅 Appointment:', 'job.save':'Save job', 'job.sendWhatsapp':'Send to technician via WhatsApp', 'job.needSyncFirst':'Sync this job first before sending the report link.', 'job.needCustPhone':'This customer has no phone number.',
+    'appt.sendToCust':'Send appointment to customer', 'appt.notSetYet':'The technician hasn\'t set an appointment yet.', 'appt.custMsgTitle':'Service appointment confirmed:', 'appt.technician':'Technician: ', 'appt.techPhone':'Phone: ', 'appt.dateTime':'Date/Time: ',
     'jf.sendLink':'Send job report link', 'jf.msg':'Please fill in the job report once done, then tap Send:',
     'job.delete':'Delete job', 'job.confirmDelete':'Delete this job?', 'job.needCustomer':'Add a customer first.', 'job.amountRequired':'Please enter a valid amount.', 'job.needTechPhone':'Assign a technician with a phone number first.',
     'job.emptyTitle':'No jobs yet', 'job.emptySub':'Tap + to create a job and assign a technician.', 'job.emptySubDash':'Create your first job from the Jobs tab.',
@@ -982,6 +1026,18 @@ const CATEGORY_LABELS_EN = {
   'Mesin Basuh':'Washing Machine', 'Iron/Seterika':'Iron'
 };
 function categoryLabel(cat){ return (LANG==='en' && CATEGORY_LABELS_EN[cat]) || cat; }
+const STATE_LIST = ['Johor','Kedah','Kelantan','Melaka','Negeri Sembilan','Pahang','Perak',
+  'Perlis','Pulau Pinang','Sabah','Sarawak','Selangor','Terengganu',
+  'WP Kuala Lumpur','WP Labuan','WP Putrajaya'];
+function buildStateSelect(selectId, currentVal){
+  let html = '<select id="'+selectId+'">';
+  html += '<option value=""'+(!currentVal?' selected':'')+'>'+t('field.choose')+'</option>';
+  STATE_LIST.forEach(function(s){
+    html += '<option value="'+esc(s)+'"'+(currentVal===s?' selected':'')+'>'+esc(s)+'</option>';
+  });
+  html += '</select>';
+  return html;
+}
 function buildCategorySelect(selectId, wrapId, currentVal){
   const isOther = !!(currentVal && CATEGORY_LIST.indexOf(currentVal)===-1);
   let html = '<select id="'+selectId+'" onchange="toggleOther(\''+selectId+'\',\''+wrapId+'\')">';
@@ -1204,10 +1260,7 @@ function renderCustomers(){
   const q = (document.getElementById('custSearch').value||'').toLowerCase();
   const list = DB.customers
     .filter(function(c){ return !q || c.name.toLowerCase().includes(q) || (c.phone||'').includes(q) || (c.area||'').toLowerCase().includes(q) || (c.code||'').toLowerCase().includes(q); })
-    .sort(function(a,b){
-      const da = nextDueDate(a) || '9999'; const db = nextDueDate(b) || '9999';
-      return da.localeCompare(db);
-    });
+    .sort(function(a,b){ return a.name.localeCompare(b.name); });
   const el = document.getElementById('customersList');
   if(list.length===0){ el.innerHTML = emptyState(ICON.userplus, t('cust.emptyTitle'), t('cust.emptySub')); return; }
   el.innerHTML = list.map(function(c){
@@ -1228,6 +1281,7 @@ function openTechForm(id){
     '<h2>' + (t2?t('tech.editTitle'):t('tech.addTitle')) + '</h2>' +
     '<label>'+t('tech.name')+'</label><input id="tName" value="' + (t2?esc(t2.name):'') + '">' +
     '<label>'+t('tech.phone')+'</label><input id="tPhone" value="' + (t2?esc(t2.phone):'') + '" placeholder="60123456789">' +
+    '<label>'+t('tech.state')+'</label>'+buildStateSelect('tState', t2?t2.state:'') +
     '<label>'+t('tech.area')+'</label><input id="tArea" value="' + (t2?esc(t2.area):'') + '" placeholder="'+t('tech.areaPh')+'">' +
     '<label>'+t('tech.skills')+'</label>'+buildCategorySelect('tSkills','tSkillsOtherWrap', t2?t2.skills:'') +
     '<label>'+t('tech.rate')+'</label><input type="number" id="tRate" value="' + (t2?t2.rate:'') + '" placeholder="'+t('tech.ratePh')+'">' +
@@ -1242,26 +1296,32 @@ function saveTech(id){
   const data = {
     name: name,
     phone: document.getElementById('tPhone').value.trim(),
+    state: document.getElementById('tState').value,
     area: document.getElementById('tArea').value.trim(),
     skills: readCategoryValue('tSkills'),
     commType: 'fixed',
-    rate: parseFloat(document.getElementById('tRate').value)||0
+    rate: parseFloat(document.getElementById('tRate').value)||0,
+    _dirty: true
   };
   let rec;
   if(id){ rec = DB.technicians.find(function(x){return x.id===id;}); Object.assign(rec, data); }
   else { data.id = nextId(); DB.technicians.push(data); rec = data; }
-  if(rec.supabaseId && sbCloud){
-    sbCloud.rpc('update_technician_profile', {
-      p_id: rec.supabaseId, p_coverage_area: rec.area||null, p_skills: rec.skills||null,
-      p_commission_type: rec.commType, p_commission_value: rec.rate||0
-    }).catch(function(){});
-  }
+  // Pushing (both brand-new inserts and edits to an already-synced technician) now happens
+  // in pushTechnicians() during the next sync pass, same _dirty-flag pattern as customers/
+  // jobs — see pushTechnicians() for why this replaced the old inline update-only call.
   save(); closeModal(); renderAll();
 }
-function deleteTech(id){
+async function deleteTech(id){
   if(!confirm(t('tech.confirmDelete'))) return;
+  const tc = DB.technicians.find(function(x){return x.id===id;});
   DB.technicians = DB.technicians.filter(function(x){return x.id!==id;});
   save(); closeModal(); renderAll();
+  // Same best-effort remote delete as deleteCustomer()/deleteJob() — technicians never had
+  // this before, so a deleted technician kept living in Supabase and would just reappear on
+  // the next sync via pullTechnicians().
+  if(tc && tc.supabaseId){
+    try{ await sbCloud.rpc('delete_technician', { p_id: tc.supabaseId }); }catch(e){}
+  }
 }
 function techCommission(tech, amount){
   if(!tech) return 0;
@@ -1277,13 +1337,21 @@ function jobTechCommission(j){
 }
 function renderTechnicians(){
   const el = document.getElementById('techList');
+  const q = (document.getElementById('techSearch').value||'').toLowerCase();
+  const list = DB.technicians
+    .filter(function(tc){
+      return !q || tc.name.toLowerCase().includes(q) || (tc.state||'').toLowerCase().includes(q) || (tc.area||'').toLowerCase().includes(q);
+    })
+    .sort(function(a,b){ return a.name.localeCompare(b.name); });
   if(DB.technicians.length===0){ el.innerHTML = emptyState(ICON.wrench, t('tech.emptyTitle'), t('tech.emptySub')); return; }
-  el.innerHTML = DB.technicians.map(function(tc){
+  if(list.length===0){ el.innerHTML = '<div class="sub" style="padding:12px 2px;">'+t('search.noResults')+'</div>'; return; }
+  el.innerHTML = list.map(function(tc){
     const jobCount = DB.jobs.filter(function(j){ return j.techId===tc.id && j.status==='done'; }).length;
+    const location = [tc.area, tc.state].filter(Boolean).join(', ');
     return '<div class="card" onclick="openTechForm(\''+tc.id+'\')">' +
       '<div class="row"><div>' +
         '<div class="name">'+esc(tc.name)+'</div>' +
-        '<div class="sub">'+esc(tc.area||'')+(tc.skills?' · '+esc(tc.skills):'')+'</div>' +
+        '<div class="sub">'+esc(location)+(tc.skills?' · '+esc(tc.skills):'')+'</div>' +
         '<div class="sub">'+esc(tc.phone||'')+' · '+jobCount+t('tech.jobsDone')+'</div>' +
       '</div><span class="badge neutral">'+fmtMoney(tc.rate)+'</span></div></div>';
   }).join('');
@@ -1352,6 +1420,7 @@ function openJobForm(id){
     '<div class="footer-actions"><button class="btn btn-primary btn-block" onclick="saveJob(' + (j?"'"+j.id+"'":'null') + ')">'+t('job.save')+'</button></div>' +
     (j?('<div class="footer-actions"><button class="btn btn-whatsapp btn-block" onclick="saveAndDispatchWhatsApp(\''+j.id+'\')">'+ICON.whatsapp+' '+t('job.sendWhatsapp')+'</button></div>' +
         '<div class="footer-actions"><button class="btn btn-whatsapp btn-block" onclick="sendJobFormLink(\''+j.id+'\')">'+ICON.whatsapp+' '+t('jf.sendLink')+'</button></div>' +
+        (j.appointmentAt ? '<div class="footer-actions"><button class="btn btn-whatsapp btn-block" onclick="sendAppointmentToCustomer(\''+j.id+'\')">'+ICON.whatsapp+' '+t('appt.sendToCust')+'</button></div>' : '') +
         '<div class="footer-actions"><button class="btn btn-ghost btn-block" onclick="generateInvoice(\''+j.id+'\')">'+ICON.receipt+' '+t('job.generateInvoice')+'</button></div>' +
         '<div class="footer-actions"><button class="btn btn-danger btn-block" onclick="deleteJob(\''+j.id+'\')">'+t('job.delete')+'</button></div>'):'');
   openModal(html);
@@ -1442,6 +1511,19 @@ async function sendJobFormLink(id){
   const link = JOB_FORM_BASE_URL + '?job=' + encodeURIComponent(j.supabaseId);
   const msg = t('jf.msg') + '\n' + link;
   const phone = tc.phone.replace(/[^0-9]/g,'');
+  window.open('https://wa.me/'+phone+'?text='+encodeURIComponent(msg), '_blank');
+}
+function sendAppointmentToCustomer(id){
+  const j = DB.jobs.find(function(x){return x.id===id;});
+  const c = DB.customers.find(function(x){return x.id===j.custId;});
+  const tc = DB.technicians.find(function(x){return x.id===j.techId;});
+  if(!c || !c.phone){ alert(t('job.needCustPhone')); return; }
+  if(!j.appointmentAt){ alert(t('appt.notSetYet')); return; }
+  const msg = t('appt.custMsgTitle') + '\n' +
+    t('appt.technician') + (tc?tc.name:'—') + '\n' +
+    t('appt.techPhone') + (tc?tc.phone:'—') + '\n' +
+    t('appt.dateTime') + fmtDateTime(j.appointmentAt);
+  const phone = c.phone.replace(/[^0-9]/g,'');
   window.open('https://wa.me/'+phone+'?text='+encodeURIComponent(msg), '_blank');
 }
 function openIssueInvoiceForm(custId){
@@ -2131,6 +2213,7 @@ function renderAll(){
 }
 document.getElementById('jobSearch').addEventListener('input', renderJobs);
 document.getElementById('custSearch').addEventListener('input', renderCustomers);
+document.getElementById('techSearch').addEventListener('input', renderTechnicians);
 
 /* ---------- PIN LOCK ---------- */
 const INACTIVITY_MS = 5*60*1000;
