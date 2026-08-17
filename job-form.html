@@ -124,14 +124,28 @@ function fmtDateTime(iso){
 }
 
 // Converts an ISO timestamp to the "YYYY-MM-DDTHH:mm" format <input type="datetime-local">
-// expects, in the technician's local time (so the prefilled value matches what they'd
-// see on a clock, not a UTC-shifted one).
+// expects, as explicit Malaysia (UTC+8) wall-clock time — same reasoning as fmtDateTime()
+// above: don't trust the technician's device timezone, shift explicitly instead. (Previously
+// used getFullYear()/getHours()/etc., which read whatever timezone the phone was set to —
+// on a phone with a wrong or non-Malaysia timezone this prefilled the wrong time, and worse,
+// silently saved a shifted appointment time on the very next tap of "Kemaskini temujanji"
+// without the technician ever touching the field.)
 function toLocalInputValue(iso){
   const d = new Date(iso);
   if(isNaN(d)) return '';
+  const my = new Date(d.getTime() + 8*60*60*1000);
   const pad = function(n){ return String(n).padStart(2,'0'); };
-  return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate()) +
-    'T' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+  return my.getUTCFullYear() + '-' + pad(my.getUTCMonth()+1) + '-' + pad(my.getUTCDate()) +
+    'T' + pad(my.getUTCHours()) + ':' + pad(my.getUTCMinutes());
+}
+
+// The datetime-local input holds no timezone info — its digits are always meant as Malaysia
+// wall-clock time (matches toLocalInputValue() above), never the device's own timezone.
+// Parses "YYYY-MM-DDTHH:mm" as if it were UTC, then subtracts 8 hours to get the true UTC
+// instant for that Malaysia time.
+function myInputToIso(val){
+  const utcGuess = new Date(val + ':00Z');
+  return new Date(utcGuess.getTime() - 8*60*60*1000).toISOString();
 }
 
 function statusLabel(s){
@@ -168,7 +182,7 @@ function renderForm(job, jobId){
     const btn = this;
     const val = document.getElementById('jfAppt').value;
     if(!val){ alert('Sila pilih tarikh dan masa dahulu.'); return; }
-    const iso = new Date(val).toISOString();
+    const iso = myInputToIso(val);
     btn.disabled = true;
     const label = btn.textContent;
     btn.textContent = 'Menyimpan...';
