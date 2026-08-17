@@ -482,6 +482,11 @@
       <div class="sub" id="syncStatus" style="margin-top:8px;"></div>
     </div>
     <div class="card">
+      <div class="name" data-t="inv.recordsTitle"></div>
+      <div class="sub" data-t="inv.recordsDesc"></div>
+      <div id="invoiceRecordsList" style="margin-top:10px;"></div>
+    </div>
+    <div class="card">
       <div class="name" data-t="settings.backupTitle"></div>
       <div class="sub" data-t="settings.backupDesc"></div>
       <div class="actions"><button class="btn btn-primary" onclick="exportData()" id="exportBtnEl"><span id="exportBtnIcon"></span><span data-t="settings.exportBtn"></span></button></div>
@@ -604,6 +609,8 @@ async function syncNow(){
     await pushCustomers();
     await pushJobs();
     await pullJobStatuses();
+    await pullInvoiceRecords();
+    await pushInvoiceRecords();
     save();
     renderAll();
     const now = new Date();
@@ -753,6 +760,59 @@ async function pushJobs(){
   }
 }
 
+// Pushes new invoice log entries up. job_id/customer_id are sent as null if that job or
+// customer hasn't synced yet — the log entry is still useful (invoice_no/customer_name/
+// amount are all local snapshots, not live references), just without the FK linkage until
+// a later push.
+async function pushInvoiceRecords(){
+  for(const r of DB.invoices){
+    if(r.supabaseId && !r._dirty) continue;
+    const c = DB.customers.find(function(x){return x.id===r.custId;});
+    const j = DB.jobs.find(function(x){return x.id===r.jobId;});
+    const { data, error } = await sbCloud.rpc('upsert_invoice_record', {
+      p_id: r.supabaseId || null, p_job_id: (j && j.supabaseId) || null,
+      p_customer_id: (c && c.supabaseId) || null, p_invoice_no: r.invoiceNo,
+      p_customer_name: r.custName || null, p_amount: r.amount || 0
+    });
+    if(!error && data){ r.supabaseId = data; delete r._dirty; }
+    else if(error){
+      console.error('pushInvoiceRecords failed for', r.invoiceNo, error);
+      lastSyncErrors.push('Invoice "'+r.invoiceNo+'": '+(error.message||JSON.stringify(error)));
+    }
+  }
+}
+
+// Pulls the full invoice log down — same reasoning as pullCustomers(): a device syncing
+// for the first time needs to see records created on other devices too, not just its own.
+async function pullInvoiceRecords(){
+  const { data, error } = await sbCloud.rpc('list_invoice_records');
+  if(error){ console.error('pullInvoiceRecords failed', error); lastSyncErrors.push('pullInvoiceRecords: '+(error.message||JSON.stringify(error))); return; }
+  if(!data) return;
+  data.forEach(function(ri){
+    let local = DB.invoices.find(function(x){ return x.supabaseId===ri.id; });
+    if(!local){
+      local = DB.invoices.find(function(x){ return !x.supabaseId && x.invoiceNo===ri.invoice_no; });
+    }
+    const localJob = DB.jobs.find(function(x){ return x.supabaseId===ri.job_id; });
+    const localCust = DB.customers.find(function(x){ return x.supabaseId===ri.customer_id; });
+    if(local){
+      local.supabaseId = ri.id;
+      if(!local._dirty){
+        local.invoiceNo = ri.invoice_no; local.custName = ri.customer_name||'';
+        local.amount = ri.amount||0; local.issuedAt = ri.issued_at||local.issuedAt;
+        if(localJob) local.jobId = localJob.id;
+        if(localCust) local.custId = localCust.id;
+      }
+    } else {
+      DB.invoices.push({
+        id: nextId(), supabaseId: ri.id, jobId: localJob?localJob.id:null,
+        custId: localCust?localCust.id:null, invoiceNo: ri.invoice_no,
+        custName: ri.customer_name||'', amount: ri.amount||0, issuedAt: ri.issued_at||''
+      });
+    }
+  });
+}
+
 // Pulls back the status a technician has set on their phone — starting a job ("in progress")
 // and marking it done, including what they logged as done/changed — and reflects it on the
 // matching local job. Admin-set statuses (new/assigned/cancelled) are left alone here; only
@@ -805,6 +865,7 @@ const TR = {
     'search.jobs':'Cari job ikut pelanggan atau juruteknik...', 'search.customers':'Cari pelanggan ikut kod, nama, telefon, kawasan...',
     'report.title':'Laporan kewangan bulanan', 'report.desc':'Semak untung kasar dan untung bersih bagi bulan pilihan.', 'report.month':'Pilih bulan', 'report.jobsCompleted':'Job selesai', 'report.revenue':'Jumlah kutipan', 'report.techPayouts':'Bayaran juruteknik', 'report.grossProfit':'Untung kasar', 'report.systemFees':'Yuran sistem', 'report.netProfit':'Untung bersih',
     'sync.title':'Segerak dengan juruteknik', 'sync.desc':'Segerak automatik setiap 15 saat semasa app dibuka. Tarik senarai juruteknik berdaftar, hantar job/pelanggan ke cloud, dan tarik status job.', 'sync.btn':'Segerak sekarang',
+    'inv.recordsTitle':'Rekod invois', 'inv.recordsDesc':'Rekod setiap invois yang telah dihantar. Disegerak merentasi semua peranti.', 'inv.recordsEmpty':'Tiada invois direkodkan lagi.', 'inv.recordsDelete':'Padam', 'inv.recordsConfirmDelete':'Padam rekod invois ini? Ini hanya memadam rekod — job dan invois itu sendiri tidak akan dipadam.',
     'sync.unavailable':'Segerakan tidak tersedia', 'sync.inProgress':'Sedang menyegerakkan…', 'sync.failed':'Segerakan gagal — cuba lagi', 'sync.lastSynced':'Segerakan terakhir: ', 'sync.never':'Belum pernah disegerakkan',
     'settings.backupTitle':'Sandaran data', 'settings.backupDesc':'Semua data disimpan hanya pada peranti ini. Eksport sandaran secara berkala, terutamanya sebelum tukar telefon.', 'settings.exportBtn':'Eksport sandaran (.json)',
     'settings.restoreTitle':'Pulihkan sandaran', 'settings.restoreDesc':'Ini akan menggantikan semua data semasa pada peranti ini dengan fail sandaran.', 'settings.restoreBtn':'Pulihkan sandaran',
@@ -851,6 +912,7 @@ const TR = {
     'search.jobs':'Search jobs by customer or technician...', 'search.customers':'Search customers by code, name, phone, area...',
     'report.title':'Monthly financial report', 'report.desc':'Check gross profit and net profit for the selected month.', 'report.month':'Select month', 'report.jobsCompleted':'Jobs completed', 'report.revenue':'Total revenue', 'report.techPayouts':'Technician payouts', 'report.grossProfit':'Gross profit', 'report.systemFees':'System fees', 'report.netProfit':'Net profit',
     'sync.title':'Sync with technicians', 'sync.desc':'Syncs automatically every 15 seconds while the app is open. Pulls in registered technicians, pushes jobs/customers to the cloud, and pulls back job status.', 'sync.btn':'Sync now',
+    'inv.recordsTitle':'Invoice records', 'inv.recordsDesc':'A record of every invoice that has been sent out. Synced across all devices.', 'inv.recordsEmpty':'No invoices recorded yet.', 'inv.recordsDelete':'Delete', 'inv.recordsConfirmDelete':'Delete this invoice record? This only removes the log entry — the job and the invoice itself are not deleted.',
     'sync.unavailable':'Sync unavailable', 'sync.inProgress':'Syncing…', 'sync.failed':'Sync failed — try again', 'sync.lastSynced':'Last synced: ', 'sync.never':'Never synced yet',
     'settings.backupTitle':'Backup data', 'settings.backupDesc':'All data is stored only on this device. Export a backup regularly, especially before switching phones.', 'settings.exportBtn':'Export backup (.json)',
     'settings.restoreTitle':'Restore backup', 'settings.restoreDesc':'This will replace all current data on this device with the backup file.', 'settings.restoreBtn':'Restore backup',
@@ -949,10 +1011,11 @@ function readCategoryValue(selectId){
 
 
 function normalizeDB(db){
-  if(!db) db = { customers:[], technicians:[], jobs:[], settings:{}, seq:1 };
+  if(!db) db = { customers:[], technicians:[], jobs:[], invoices:[], settings:{}, seq:1 };
   if(!db.customers) db.customers = [];
   if(!db.technicians) db.technicians = [];
   if(!db.jobs) db.jobs = [];
+  if(!db.invoices) db.invoices = [];
   if(!db.settings) db.settings = {};
   if(typeof db.settings.intervalMonths !== 'number') db.settings.intervalMonths = 3;
   if(!db.settings.business) db.settings.business = {name:'',phone:'',address:'',payment:'',logo:'',qr:''};
@@ -1783,6 +1846,18 @@ async function generateInvoice(id){
     save();
     renderAll();
   }
+  // Log this invoice once — covers both the normal "Generate invoice" button and the
+  // quick-invoice flow (issueInvoiceForCustomer), since both end up here. Keyed by job id
+  // so re-generating/re-downloading the same invoice later never creates a duplicate entry.
+  if(!DB.invoices.some(function(x){return x.jobId===j.id;})){
+    DB.invoices.push({
+      id: nextId(), supabaseId: null, jobId: j.id, custId: j.custId,
+      invoiceNo: j.invoiceNo, custName: c?c.name:'', amount: j.amount,
+      issuedAt: new Date().toISOString(), _dirty: true
+    });
+    save();
+    renderInvoiceRecords();
+  }
   const biz = DB.settings.business || {};
   let assets;
   try{
@@ -1894,6 +1969,33 @@ function renderDashboard(){
 }
 
 /* ---------- FINANCIAL REPORT ---------- */
+function renderInvoiceRecords(){
+  const el = document.getElementById('invoiceRecordsList');
+  if(!el) return;
+  const sorted = DB.invoices.slice().sort(function(a,b){ return (b.issuedAt||'').localeCompare(a.issuedAt||''); });
+  if(!sorted.length){ el.innerHTML = '<div class="sub">'+t('inv.recordsEmpty')+'</div>'; return; }
+  el.innerHTML = sorted.map(function(r){
+    return '<div class="row" style="padding:8px 0;border-bottom:1px solid var(--line);">' +
+      '<div>' +
+        '<div class="name" style="font-size:14px;">'+esc(r.invoiceNo)+'</div>' +
+        '<div class="sub">'+esc(r.custName||'—')+' · '+fmtMoney(r.amount)+'</div>' +
+        '<div class="sub">'+esc(fmtDateTime(r.issuedAt))+'</div>' +
+      '</div>' +
+      '<button class="btn btn-danger btn-sm" onclick="deleteInvoiceRecord(\''+r.id+'\')">'+t('inv.recordsDelete')+'</button>' +
+    '</div>';
+  }).join('');
+}
+async function deleteInvoiceRecord(id){
+  if(!confirm(t('inv.recordsConfirmDelete'))) return;
+  const r = DB.invoices.find(function(x){return x.id===id;});
+  DB.invoices = DB.invoices.filter(function(x){return x.id!==id;});
+  save(); renderInvoiceRecords();
+  // Best-effort remote delete, same pattern as deleteCustomer()/deleteJob() — this only
+  // removes the log entry, never the underlying job or its own invoiceNo.
+  if(r && r.supabaseId){
+    try{ await sbCloud.rpc('delete_invoice_record', { p_id: r.supabaseId }); }catch(e){}
+  }
+}
 function renderFinancialReport(){
   const input = document.getElementById('reportMonth');
   if(!input.value) input.value = todayISO().slice(0,7);
@@ -2016,6 +2118,7 @@ function renderAll(){
   renderCustomers();
   renderTechnicians();
   renderFinancialReport();
+  renderInvoiceRecords();
   refreshSyncStatusLabel();
   document.getElementById('defaultInterval').value = DB.settings.intervalMonths||3;
   const biz = DB.settings.business||{};
