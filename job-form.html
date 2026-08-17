@@ -180,6 +180,8 @@ function renderForm(job, jobId){
         job.appointment_at = iso;
         alert('Temujanji disahkan.');
         btn.textContent = 'Kemaskini temujanji';
+        const hint = btn.parentElement.querySelector('.sub');
+        if(hint) hint.textContent = 'Ditetapkan buat masa ini: ' + fmtDateTime(job.appointment_at);
       }
     }catch(e){
       alert('Gagal simpan temujanji. Sila cuba lagi.');
