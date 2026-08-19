@@ -1956,6 +1956,11 @@ function statusBadge(status){
   const pair = map[status]||['—','neutral'];
   return '<span class="badge '+pair[1]+'">'+pair[0]+'</span>';
 }
+function jobSortRank(j){
+  if(j.status==='done') return 2;
+  if(j.appointmentAt && j.status!=='cancelled') return 0;
+  return 1;
+}
 function renderJobs(){
   const chipEl = document.getElementById('jobFilterChip');
   if(jobFilter==='open'){
@@ -1967,7 +1972,12 @@ function renderJobs(){
   }
   const q = (document.getElementById('jobSearch').value||'').toLowerCase();
   const thisMonth = todayISO().slice(0,7);
-  const list = DB.jobs.slice().sort(function(a,b){ return b.date.localeCompare(a.date); });
+  const list = DB.jobs.slice().sort(function(a,b){
+    const ra = jobSortRank(a), rb = jobSortRank(b);
+    if(ra !== rb) return ra - rb;
+    if(ra === 0) return a.appointmentAt.localeCompare(b.appointmentAt);
+    return b.date.localeCompare(a.date);
+  });
   const filtered = list.filter(function(j){
     if(jobFilter==='open' && !(j.status==='new'||j.status==='assigned'||j.status==='in_progress')) return false;
     if(jobFilter==='month' && !(j.status==='done' && j.date.slice(0,7)===thisMonth)) return false;
