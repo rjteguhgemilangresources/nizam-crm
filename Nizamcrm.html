@@ -1256,11 +1256,20 @@ function dueStatus(c){
   if(diff <= 7) return {label:t('cust.dueSoon') + fmtDate(due), cls:'warn'};
   return {label:t('cust.upcoming') + fmtDate(due), cls:'ok'};
 }
+function custSortRank(c){
+  const st = dueStatus(c);
+  return (st.cls==='bad' || st.cls==='warn') ? 0 : 1;
+}
 function renderCustomers(){
   const q = (document.getElementById('custSearch').value||'').toLowerCase();
   const list = DB.customers
     .filter(function(c){ return !q || c.name.toLowerCase().includes(q) || (c.phone||'').includes(q) || (c.area||'').toLowerCase().includes(q) || (c.code||'').toLowerCase().includes(q); })
-    .sort(function(a,b){ return a.name.localeCompare(b.name); });
+    .sort(function(a,b){
+      const ra = custSortRank(a), rb = custSortRank(b);
+      if(ra !== rb) return ra - rb;
+      if(ra === 0) return nextDueDate(a).localeCompare(nextDueDate(b));
+      return a.name.localeCompare(b.name);
+    });
   const el = document.getElementById('customersList');
   if(list.length===0){ el.innerHTML = emptyState(ICON.userplus, t('cust.emptyTitle'), t('cust.emptySub')); return; }
   el.innerHTML = list.map(function(c){
