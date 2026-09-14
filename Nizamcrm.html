@@ -716,7 +716,7 @@ async function pullCustomers(){
       // customer who filled request-form.html directly -- created_at is what drives
       // the 24h "New" badge in renderCustomers() below.
       DB.customers.push({
-        id: nextId(), supabaseId: rc.id, name: rc.name, phone: rc.phone||'',
+        id: nextId(), code: nextCustCode(), supabaseId: rc.id, name: rc.name, phone: rc.phone||'',
         address: rc.address||'', area: rc.area||'', brand: rc.brand||'', model: rc.model||'',
         category: rc.category||'', createdAt: rc.created_at||'', source: rc.source||'manual',
         lastService: rc.last_service_date||'', recurring: rc.recurring!==false, notes: rc.notes||''
