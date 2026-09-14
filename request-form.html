@@ -267,11 +267,11 @@ document.getElementById('fSubmit').addEventListener('click', async function(){
   if(subCategory === 'Lain Brand - Sila Nyatakan?' && !subCategoryOther){ errEl.textContent = 'Sila nyatakan jenama.'; errEl.style.display = 'block'; return; }
   if(machineType === 'Lain-lain - Sila Nyatakan?' && !machineTypeOther){ errEl.textContent = 'Sila nyatakan jenis mesin anda.'; errEl.style.display = 'block'; return; }
 
-  // Poskod + Negeri folded into the address text (no separate columns on
-  // `customers` yet) so the full location still lands somewhere Nizam sees it.
+  // Poskod still has no dedicated column, so it stays folded into the address text.
+  // Negeri now has its own column (submit_service_request's p_area) and is sent
+  // separately below, so it's no longer duplicated into the address string.
   const fullAddress = address +
-    (postcode ? ('\n' + postcode) : '') +
-    (state ? (', ' + state) : '');
+    (postcode ? ('\n' + postcode) : '');
   const subCategoryLine = subCategory === 'Lain Brand - Sila Nyatakan?' && subCategoryOther
     ? ('Jenis Servis: Lain Brand - ' + subCategoryOther)
     : (subCategory ? ('Jenis Servis: ' + subCategory) : '');
@@ -289,7 +289,8 @@ document.getElementById('fSubmit').addEventListener('click', async function(){
       p_phone: '60' + phoneDigits,
       p_address: fullAddress,
       p_category: category || null,
-      p_notes: fullNotes || null
+      p_notes: fullNotes || null,
+      p_area: state || null
     });
     if(error || !data){
       errEl.textContent = 'Gagal menghantar. Sila cuba lagi atau hubungi kami terus.';
