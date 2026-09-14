@@ -441,6 +441,11 @@
       <div class="stat-card" onclick="showMonthJobs()"><div class="num" id="statProfit">RM0</div><div class="lbl" data-t="stat.profit"></div></div>
     </div>
 
+    <div id="serviceRequestsSection" style="display:none;">
+      <div class="section-title" data-t="section.serviceRequests"></div>
+      <div id="serviceRequestsList"></div>
+    </div>
+
     <div class="section-title" data-t="section.attention"></div>
     <div id="attentionList"></div>
 
@@ -702,6 +707,7 @@ async function pullCustomers(){
         local.name = rc.name; local.phone = rc.phone||''; local.address = rc.address||'';
         local.area = rc.area||''; local.brand = rc.brand||''; local.model = rc.model||'';
         local.category = rc.category||''; local.createdAt = rc.created_at||local.createdAt||'';
+        local.source = rc.source||local.source||'manual';
         local.lastService = rc.last_service_date||''; local.recurring = rc.recurring!==false;
         local.notes = rc.notes||'';
       }
@@ -712,7 +718,7 @@ async function pullCustomers(){
       DB.customers.push({
         id: nextId(), supabaseId: rc.id, name: rc.name, phone: rc.phone||'',
         address: rc.address||'', area: rc.area||'', brand: rc.brand||'', model: rc.model||'',
-        category: rc.category||'', createdAt: rc.created_at||'',
+        category: rc.category||'', createdAt: rc.created_at||'', source: rc.source||'manual',
         lastService: rc.last_service_date||'', recurring: rc.recurring!==false, notes: rc.notes||''
       });
     }
@@ -908,7 +914,7 @@ async function pullJobStatuses(){
 const TR = {
   ms: {
     'stat.pending':'Job terbuka', 'stat.due':'Akan tamat 7 hari', 'stat.revenue':'Kasar (bulan ini)', 'stat.profit':'Bersih (bulan ini)',
-    'section.attention':'Perlu perhatian', 'section.recent':'Job terkini',
+    'section.attention':'Perlu perhatian', 'section.recent':'Job terkini', 'section.serviceRequests':'Permintaan Servis',
     'search.jobs':'Cari job ikut pelanggan atau juruteknik...', 'search.customers':'Cari pelanggan ikut kod, nama, telefon, kawasan...', 'search.technicians':'Cari juruteknik ikut nama, negeri, kawasan...', 'search.noResults':'Tiada hasil dijumpai.',
     'report.title':'Laporan kewangan bulanan', 'report.desc':'Semak untung kasar dan untung bersih bagi bulan pilihan.', 'report.month':'Pilih bulan', 'report.jobsCompleted':'Job selesai', 'report.revenue':'Jumlah kutipan', 'report.techPayouts':'Bayaran juruteknik', 'report.grossProfit':'Untung kasar', 'report.systemFees':'Yuran sistem', 'report.netProfit':'Untung bersih',
     'sync.title':'Segerak dengan juruteknik', 'sync.desc':'Segerak automatik setiap 15 saat semasa app dibuka. Tarik senarai juruteknik berdaftar, hantar job/pelanggan ke cloud, dan tarik status job.', 'sync.btn':'Segerak sekarang',
@@ -941,6 +947,7 @@ const TR = {
     'job.deletedCustomer':'(pelanggan dipadam)', 'job.charged':' dikenakan · ', 'job.forTech':' untuk juruteknik · ', 'job.platformFee':' yuran sistem · ', 'job.forYou':' untuk anda',
     'wa.title':'Job baharu ditugaskan:', 'wa.customer':'Pelanggan: ', 'wa.phone':'Telefon: ', 'wa.area':'Kawasan: ', 'wa.address':'Alamat: ', 'wa.brand':'Kategori: ', 'wa.date':'Tarikh: ', 'wa.amount':'Jumlah: ', 'wa.notes':'Nota: ',
     'dash.allClear':'Semua dah kemas kini — tiada yang tertunggak atau akan tamat.',
+    'dash.newRequest':'Baharu',
     'settings.saved':'Disimpan.', 'settings.chooseFile':'Pilih fail sandaran dahulu.', 'settings.confirmRestore':'Ini akan menggantikan semua data semasa. Teruskan?',
     'settings.restored':'Sandaran berjaya dipulihkan.', 'settings.badFile':'Fail tidak boleh dibaca.', 'settings.exportPrefix':'aquaops-sandaran-',
     'filter.open':'Menapis: Job terbuka', 'filter.month':'Menapis: Selesai bulan ini', 'filter.clear':'✕ Kosongkan',
@@ -956,7 +963,7 @@ const TR = {
   },
   en: {
     'stat.pending':'Open jobs', 'stat.due':'Due within 7 days', 'stat.revenue':'Kasar / gross (this month)', 'stat.profit':'Bersih / net (this month)',
-    'section.attention':'Needs attention', 'section.recent':'Recent jobs',
+    'section.attention':'Needs attention', 'section.recent':'Recent jobs', 'section.serviceRequests':'Service requests',
     'search.jobs':'Search jobs by customer or technician...', 'search.customers':'Search customers by code, name, phone, area...', 'search.technicians':'Search technicians by name, state, area...', 'search.noResults':'No results found.',
     'report.title':'Monthly financial report', 'report.desc':'Check gross profit and net profit for the selected month.', 'report.month':'Select month', 'report.jobsCompleted':'Jobs completed', 'report.revenue':'Total revenue', 'report.techPayouts':'Technician payouts', 'report.grossProfit':'Gross profit', 'report.systemFees':'System fees', 'report.netProfit':'Net profit',
     'sync.title':'Sync with technicians', 'sync.desc':'Syncs automatically every 15 seconds while the app is open. Pulls in registered technicians, pushes jobs/customers to the cloud, and pulls back job status.', 'sync.btn':'Sync now',
@@ -989,6 +996,7 @@ const TR = {
     'job.deletedCustomer':'(deleted customer)', 'job.charged':' charged · ', 'job.forTech':' for technician · ', 'job.platformFee':' system fee · ', 'job.forYou':' for you',
     'wa.title':'New job assigned:', 'wa.customer':'Customer: ', 'wa.phone':'Phone: ', 'wa.area':'Area: ', 'wa.address':'Address: ', 'wa.brand':'Category: ', 'wa.date':'Date: ', 'wa.amount':'Amount: ', 'wa.notes':'Notes: ',
     'dash.allClear':'All caught up — nothing overdue or due soon.',
+    'dash.newRequest':'New',
     'settings.saved':'Saved.', 'settings.chooseFile':'Choose a backup file first.', 'settings.confirmRestore':'This will replace all current data. Continue?',
     'settings.restored':'Backup restored.', 'settings.badFile':'Could not read that file.', 'settings.exportPrefix':'aquaops-backup-',
     'filter.open':'Filtering: Open jobs', 'filter.month':'Filtering: Done this month', 'filter.clear':'✕ Clear',
@@ -1273,6 +1281,14 @@ function isNewCustomer(c){
   if(!c.createdAt) return false;
   const ageMs = Date.now() - new Date(c.createdAt).getTime();
   return ageMs >= 0 && ageMs < 24*60*60*1000;
+}
+// True only for customers created via request-form.html (customers.source='web_form',
+// Phase 16), as opposed to isNewCustomer() above which is true for ANY customer created
+// in the last 24h regardless of how -- including one Nizam just typed in himself. Also
+// time-boxed to 24h so the Home tab's "Service Requests" queue clears itself once it's
+// been seen, same self-expiring pattern as the "New" badge.
+function isServiceRequest(c){
+  return c.source==='web_form' && isNewCustomer(c);
 }
 function renderCustomers(){
   const q = (document.getElementById('custSearch').value||'').toLowerCase();
@@ -2051,6 +2067,24 @@ function renderDashboard(){
   const bersih = kasar - payouts - platformFees;
   document.getElementById('statRevenue').textContent = fmtMoney(kasar);
   document.getElementById('statProfit').textContent = fmtMoney(bersih);
+
+  const reqSection = document.getElementById('serviceRequestsSection');
+  const reqList = document.getElementById('serviceRequestsList');
+  const serviceRequests = DB.customers.filter(isServiceRequest)
+    .sort(function(a,b){ return (b.createdAt||'').localeCompare(a.createdAt||''); });
+  if(serviceRequests.length===0){
+    reqSection.style.display = 'none';
+  } else {
+    reqSection.style.display = '';
+    reqList.innerHTML = serviceRequests.map(function(c){
+      return '<div class="card" onclick="openCustomerForm(\''+c.id+'\')">' +
+        '<div class="row"><div>' +
+          '<div class="name">'+esc(c.name)+'</div>' +
+          '<div class="sub">'+esc(c.category||c.brand||'')+(c.area?' · '+esc(c.area):'')+'</div>' +
+          '<div class="sub">'+esc(c.phone||'')+'</div>' +
+        '</div><span class="badge ok">'+t('dash.newRequest')+'</span></div></div>';
+    }).join('');
+  }
 
   const attn = document.getElementById('attentionList');
   const overdue = DB.customers.filter(function(c){ const d=nextDueDate(c); return d && daysBetween(todayISO(),d)<0; });
