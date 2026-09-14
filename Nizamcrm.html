@@ -701,13 +701,18 @@ async function pullCustomers(){
       if(!local._dirty){
         local.name = rc.name; local.phone = rc.phone||''; local.address = rc.address||'';
         local.area = rc.area||''; local.brand = rc.brand||''; local.model = rc.model||'';
+        local.category = rc.category||''; local.createdAt = rc.created_at||local.createdAt||'';
         local.lastService = rc.last_service_date||''; local.recurring = rc.recurring!==false;
         local.notes = rc.notes||'';
       }
     } else {
+      // A brand-new row here (no local match by supabaseId or phone) is most often a
+      // customer who filled request-form.html directly -- created_at is what drives
+      // the 24h "New" badge in renderCustomers() below.
       DB.customers.push({
         id: nextId(), supabaseId: rc.id, name: rc.name, phone: rc.phone||'',
         address: rc.address||'', area: rc.area||'', brand: rc.brand||'', model: rc.model||'',
+        category: rc.category||'', createdAt: rc.created_at||'',
         lastService: rc.last_service_date||'', recurring: rc.recurring!==false, notes: rc.notes||''
       });
     }
@@ -1260,6 +1265,15 @@ function custSortRank(c){
   const st = dueStatus(c);
   return (st.cls==='bad' || st.cls==='warn') ? 0 : 1;
 }
+// True for the first 24h after created_at -- covers customers submitted via
+// request-form.html. Computed on every render rather than stored as a status
+// field, so it reverts to a normal customer on its own once 24h pass, no cron
+// or extra write needed.
+function isNewCustomer(c){
+  if(!c.createdAt) return false;
+  const ageMs = Date.now() - new Date(c.createdAt).getTime();
+  return ageMs >= 0 && ageMs < 24*60*60*1000;
+}
 function renderCustomers(){
   const q = (document.getElementById('custSearch').value||'').toLowerCase();
   const list = DB.customers
@@ -1274,12 +1288,13 @@ function renderCustomers(){
   if(list.length===0){ el.innerHTML = emptyState(ICON.userplus, t('cust.emptyTitle'), t('cust.emptySub')); return; }
   el.innerHTML = list.map(function(c){
     const st = dueStatus(c);
+    const newTag = isNewCustomer(c) ? '<span class="badge ok" style="margin-right:6px;">New</span>' : '';
     return '<div class="card" onclick="openCustomerForm(\''+c.id+'\')">' +
       '<div class="row"><div>' +
         '<div class="name">'+(c.code?'<span class="cust-code">#'+esc(c.code)+'</span> ':'')+esc(c.name)+'</div>' +
-        '<div class="sub">'+esc(c.brand||'')+' '+(c.model?'· '+esc(c.model):'')+' '+(c.area?'· '+esc(c.area):'')+'</div>' +
+        '<div class="sub">'+esc(c.category||c.brand||'')+' '+(c.model?'· '+esc(c.model):'')+' '+(c.area?'· '+esc(c.area):'')+'</div>' +
         '<div class="sub">'+esc(c.phone||'')+'</div>' +
-      '</div><span class="badge '+st.cls+'">'+st.label+'</span></div></div>';
+      '</div><div>'+newTag+'<span class="badge '+st.cls+'">'+st.label+'</span></div></div></div>';
   }).join('');
 }
 
