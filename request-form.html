@@ -34,6 +34,8 @@
   .phone-row{ display:flex; gap:8px; }
   .phone-row select{ width:110px; flex:none; }
   .phone-row input{ flex:1; }
+  #fMachineType optgroup, #fMachineType option{ font-size:12px; }
+  #fMachineType optgroup{ font-weight:700; border-top:1px solid var(--line); padding-top:4px; }
   .btn{
     display:block; width:100%; padding:14px; border:none; border-radius:8px;
     font-size:16px; font-weight:700; margin-top:18px; cursor:pointer;
@@ -74,25 +76,25 @@
       <option value="">-- Pilih jenis mesin --</option>
       <optgroup label="Coway">
         <option>Coway - Core</option>
-        <option>Coway - Villeam I&amp;II</option>
-        <option>Coway - Neo &amp; Neo Plus</option>
-        <option>Coway - Ombak</option>
         <option>Coway - Inception (Alkali)</option>
         <option>Coway - Lucy (Ais)</option>
+        <option>Coway - Neo &amp; Neo Plus</option>
+        <option>Coway - Ombak</option>
+        <option>Coway - Villeam I &amp; II</option>
       </optgroup>
       <optgroup label="Cuckoo">
-        <option>Cuckoo - King Top</option>
+        <option>Cuckoo - Fusion Top</option>
         <option>Cuckoo - Icon</option>
         <option>Cuckoo - Iris Top</option>
-        <option>Cuckoo - Fusion Top</option>
+        <option>Cuckoo - King Top</option>
+        <option>Cuckoo - Warrior</option>
         <option>Cuckoo - Water Stand</option>
         <option>Cuckoo - XCel</option>
-        <option>Cuckoo - Warrior</option>
       </optgroup>
-      <option>SK Magic</option>
       <optgroup label="Lain-lain">
-        <option>LG</option>
         <option>Elken</option>
+        <option>LG</option>
+        <option>SK Magic</option>
         <option value="Lain-lain - Sila Nyatakan?">Lain-lain - Sila Nyatakan?</option>
       </optgroup>
     </select>
@@ -128,11 +130,11 @@
     <label>Kategori Servis</label>
     <select id="fCategory">
       <option value="">-- Pilih Kategori --</option>
-      <option>Water Cooler</option>
-      <option>Pre-Filter/Outdoor</option>
-      <option>Trouble Shooting/Repair</option>
-      <option>Kangen Water Ionizer</option>
       <option>Water Filter</option>
+      <option>Kangen Water Ionizer</option>
+      <option>Trouble Shooting/Repair</option>
+      <option>Pre-Filter/Outdoor</option>
+      <option>Water Cooler</option>
       <option value="Other">Lain-lain</option>
     </select>
     <input id="fCategoryOther" class="hidden" placeholder="Nyatakan kategori servis" style="margin-top:8px;">
@@ -171,7 +173,8 @@ function esc(s){ return (s==null?'':String(s)).replace(/[&<>"']/g, function(c){ 
 const SUB_CATEGORIES = {
   'Water Cooler': [
     'Normal Servis - RM180/mesin',
-    'Normal Servis PROMO - RM150/mesin (PROMO untuk kuantiti lebih 3 mesin)'
+    'Normal Servis PROMO - RM150/mesin (PROMO untuk kuantiti lebih 3 mesin)',
+    'Repair/Tukar Aksesori'
   ],
   'Pre-Filter/Outdoor': [
     'Flushing/Backwash - RM90',
@@ -180,18 +183,20 @@ const SUB_CATEGORIES = {
     'New Item/Install - Stainless Steel - RM1,400'
   ],
   'Trouble Shooting/Repair': [
-    'Pelampung Valve - RM90',
-    'Compressor - Gas - RM450',
     'Air Melimpah/DLFC - RM180',
     'Air Melimpah/Feednos - RM180',
     'Tak Panas/Sensor Panas - RM180',
-    'Tak Sejuk/Sensor Sejuk - RM180'
+    'Tak Sejuk/Sensor Sejuk - RM180',
+    'Compressor - Gas - RM450',
+    'Pelampung Valve - RM90',
+    'Repair/Tukar Aksesori'
   ],
   'Kangen Water Ionizer': [
-    'E-Cleaning - RM90',
-    'Filter Replacement & Deep Cleaning - RM680 (PROMO)',
+    'Deep Cleaning - RM250',
     'Filter Replacement - RM500',
-    'Deep Cleaning - RM250'
+    'Filter Replacement & Deep Cleaning - RM680 (PROMO)',
+    'E-Cleaning - RM90',
+    'Repair/Tukar Aksesori'
   ],
   'Water Filter': [
     'Coway/Cuckoo/SK Magic - Flushing/Servis 6 Bulan - RM150',
