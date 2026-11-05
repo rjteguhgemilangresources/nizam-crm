@@ -72,6 +72,7 @@ a.b{display:inline-flex;align-items:center;justify-content:center;text-decoratio
 .brand{display:flex;align-items:center;gap:10px;min-width:0}.bl{height:30px;width:auto;background:#fff;border-radius:8px;padding:3px;flex:none}.top h1{font-size:16.5px;white-space:nowrap}
 .ll{width:200px;height:auto;margin-bottom:10px}
 @media(max-width:380px){.top h1{font-size:14px}}
+.pt{width:100%;border-collapse:collapse;font-size:13px;margin-top:6px}.pt th{font-weight:600;color:var(--soft);text-align:right;padding:6px 0}.pt td{padding:9px 0;border-top:1px solid var(--line);text-align:right;font-variant-numeric:tabular-nums}.pt th:first-child,.pt td:first-child{text-align:left}.pt .g{color:var(--ok);font-weight:700}.pt .n{color:var(--bad);font-weight:700}
 </style>
 </head>
 <body>
@@ -109,7 +110,7 @@ const cm=()=>{$('#m').innerHTML=''};
 const go=t=>{tab=t;render()};
 const sv=p=>'<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+p+'</svg>';
 const IC={s:sv('<path d="M21 8l-9-5-9 5v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/>'),j:sv('<path d="M6 2l-2 4v14h16V6l-2-4z"/><path d="M4 6h16M9 10a3 3 0 006 0"/>'),c:sv('<circle cx="9" cy="8" r="3.5"/><path d="M2 20c0-3.5 3-6 7-6s7 2.5 7 6"/><circle cx="17.5" cy="9" r="2.5"/><path d="M17 14c3 0 5 2 5 5"/>'),w:sv('<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2M3 13h18"/>'),e:sv('<rect x="3" y="6" width="18" height="14" rx="2"/><path d="M3 10h18M16 15h2"/>'),l:sv('<circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/>')};
-const I={app:['Nizam Stok & Jualan','Nizam Stock & Sales'],tab_s:['Stok','Stock'],tab_j:['Jualan','Sales'],tab_l:['Lagi','More'],tab_w:['Pekerja','Workers'],tab_e:['Belanja','Expenses'],tab_c:['Pelanggan','Customers'],noCust:['Belum ada pelanggan.<br>Tekan + untuk tambah pelanggan.','No customers yet.<br>Tap + to add a customer.'],searchC:['Cari nama / telefon','Search name / phone'],custL:['pelanggan','customer'],wa:['No. WhatsApp','WhatsApp number'],area:['Kawasan','Area'],src:['Sumber','Source'],temp:['Suhu','Temperature'],stage:['Peringkat','Stage'],health:['Matlamat kesihatan (pilihan)','Health goal (optional)'],litres:['Air diminum sehari (liter)','Water per day (litres)'],consent:['Pelanggan bersetuju maklumatnya disimpan untuk tujuan susulan (PDPA)','Customer agrees to their details being kept for follow-up (PDPA)'],needConsent:['Sila tandakan persetujuan pelanggan','Please tick the customer consent'],needCName:['Isi nama dan nombor WhatsApp','Enter the name and WhatsApp number'],st_lead:['Lead Baru','New lead'],st_contact:['Dihubungi','Contacted'],st_demo:['Sudah Demo','Demo done'],st_cust:['Pelanggan','Customer'],st_lost:['Tidak Berminat','Not interested'],t_cold:['Sejuk','Cold'],t_warm:['Suam','Warm'],t_hot:['Panas','Hot'],waBtn:['WhatsApp','WhatsApp'],callBtn:['Panggil','Call'],buyBtn:['Jualan','Sell'],hist2:['Sejarah jualan','Sales history'],noHist:['Tiada jualan lagi','No sales yet'],tplT:['Pilih template WhatsApp','Choose a WhatsApp template'],blankMsg:['Mesej kosong','Blank message'],blankSub:['Buka WhatsApp tanpa template','Open WhatsApp without a template'],tplMgr:['Template WhatsApp','WhatsApp templates'],tplName:['Nama template','Template name'],tplText:['Mesej','Message'],tplHint:['Guna {nama} untuk nama pelanggan dan {kedai} untuk nama kedai','Use {nama} for the customer name and {kedai} for the shop name'],needTpl:['Isi nama dan mesej','Enter a name and a message'],cDelCust:['Padam pelanggan ini?','Delete this customer?'],cDelTpl:['Padam template ini?','Delete this template?'],tpl:['template','template'],kangen:['Air Kangen','Kangen Water'],pinT:['Kunci PIN','PIN lock'],pinOld:['PIN semasa','Current PIN'],pinNew:['PIN baru (4 digit)','New PIN (4 digits)'],pinNew2:['Sahkan PIN baru','Confirm new PIN'],pinBad:['PIN salah','Wrong PIN'],pinOk:['PIN ditukar','PIN changed'],pinErr:['Semak PIN semasa dan PIN baru','Check the current and new PIN'],pinEnter:['Masukkan PIN','Enter PIN'],cloud:['Simpanan awan (cloud)','Cloud storage'],code:['Kod akses kedai','Shop access code'],syncNow:['Segerak sekarang','Sync now'],offline:['Tiada internet','No internet'],syncing:['Menyegerak...','Syncing...'],synced:['Siap disegerak','Synced'],syncErr:['Gagal segerak. Cuba lagi.','Sync failed. Try again.'],badCode:['Kod akses salah','Wrong access code'],noCode:['Masukkan kod akses untuk mula segerak','Enter the access code to start syncing'],rec:['rekod','records'],records:['Rekod','Records'],forWhat:['Bayaran untuk','Paid for'],cDelPay:['Padam rekod komisen ini?','Delete this commission record?'],stockG:['Stok aksesori','Stock accessories'],pmode:['Jenis harga','Price type'],normalP:['Harga biasa','Normal price'],agentP:['Harga Agent','Agent price'],addProd:['Tambah produk','Add product'],prod:['produk','product'],prodNote:['Harga biasa / Harga Agent','Normal price / Agent price'],needPName:['Isi nama produk','Enter the product name'],cDelProd:['Padam produk ini?','Delete this product?'],noExp:['Belum ada belanja.<br>Tekan + untuk tambah sewa atau penyelenggaraan.','No expenses yet.<br>Tap + to add rent or maintenance.'],rent:['Sewa kedai','Shop rent'],maint:['Penyelenggaraan','Maintenance'],asset:['Aset syarikat','Company assets'],assetEx:['Nama aset, contoh: laptop, meja, kerusi','Asset name, e.g. laptop, desk, chair'],cat:['Kategori','Category'],amount:['Jumlah (RM)','Amount (RM)'],expense:['belanja','expense'],totalExp:['Jumlah belanja','Total expenses'],needAmt:['Isi jumlah','Enter the amount'],cDelExp:['Padam belanja ini?','Delete this expense?'],month:['Bulan','Month'],sales:['jualan','sales'],totalComm:['Jumlah komisen','Total commission'],noWork:['Belum ada pekerja.<br>Tekan + untuk tambah pekerja.','No workers yet.<br>Tap + to add a worker.'],worker:['pekerja','worker'],ic:['No. IC','IC number'],commL:['Komisen','Commission'],other2:['Maklumat lain','Other details'],needWName:['Isi nama pekerja','Enter the worker name'],cDelWork:['Padam pekerja ini?','Delete this worker?'],
+const I={app:['Nizam Stok & Jualan','Nizam Stock & Sales'],tab_s:['Stok','Stock'],tab_j:['Jualan','Sales'],tab_l:['Lagi','More'],tab_w:['Pekerja','Workers'],tab_e:['Belanja','Expenses'],zakat:['Zakat','Zakat'],zType:['Jenis zakat','Zakat type'],z_perniagaan:['Perniagaan','Business'],z_peribadi:['Peribadi','Personal'],z_filter:['Filter','Filter'],z_none:['Tiada jenis','No type'],costL:['Kos bahan mentah (RM)','Raw material cost (RM)'],costS:['Kos','Cost'],sellS:['Jualan','Selling'],sAll:['Jualan keseluruhan','Total sales (all time)'],profT:['Kos bahan & untung (RM)','Material cost & profit (RM)'],costR:['Kos bahan','Material cost'],profR:['Untung','Profit'],pToday:['Hari ini','Today'],pMonth:['Bulan ini','This month'],pAll:['Keseluruhan','Overall'],profNote:['Untung = jualan tolak kos bahan mentah bagi barang yang dijual','Profit = sales minus the raw material cost of the items sold'],logo:['Logo syarikat','Company logo'],upLogo:['Muat naik logo','Upload logo'],rmLogo:['Buang logo','Remove logo'],logoHint:['Logo ini dipaparkan di resit PDF','This logo appears on the PDF receipt'],logoErr:['Fail gambar tidak sah','Invalid image file'],tab_c:['Pelanggan','Customers'],noCust:['Belum ada pelanggan.<br>Tekan + untuk tambah pelanggan.','No customers yet.<br>Tap + to add a customer.'],searchC:['Cari nama / telefon','Search name / phone'],custL:['pelanggan','customer'],wa:['No. WhatsApp','WhatsApp number'],area:['Kawasan','Area'],src:['Sumber','Source'],temp:['Suhu','Temperature'],stage:['Peringkat','Stage'],health:['Matlamat kesihatan (pilihan)','Health goal (optional)'],litres:['Air diminum sehari (liter)','Water per day (litres)'],consent:['Pelanggan bersetuju maklumatnya disimpan untuk tujuan susulan (PDPA)','Customer agrees to their details being kept for follow-up (PDPA)'],needConsent:['Sila tandakan persetujuan pelanggan','Please tick the customer consent'],needCName:['Isi nama dan nombor WhatsApp','Enter the name and WhatsApp number'],st_lead:['Lead Baru','New lead'],st_contact:['Dihubungi','Contacted'],st_demo:['Sudah Demo','Demo done'],st_cust:['Pelanggan','Customer'],st_lost:['Tidak Berminat','Not interested'],t_cold:['Sejuk','Cold'],t_warm:['Suam','Warm'],t_hot:['Panas','Hot'],waBtn:['WhatsApp','WhatsApp'],callBtn:['Panggil','Call'],buyBtn:['Jualan','Sell'],hist2:['Sejarah jualan','Sales history'],noHist:['Tiada jualan lagi','No sales yet'],tplT:['Pilih template WhatsApp','Choose a WhatsApp template'],blankMsg:['Mesej kosong','Blank message'],blankSub:['Buka WhatsApp tanpa template','Open WhatsApp without a template'],tplMgr:['Template WhatsApp','WhatsApp templates'],tplName:['Nama template','Template name'],tplText:['Mesej','Message'],tplHint:['Guna {nama} untuk nama pelanggan dan {kedai} untuk nama kedai','Use {nama} for the customer name and {kedai} for the shop name'],needTpl:['Isi nama dan mesej','Enter a name and a message'],cDelCust:['Padam pelanggan ini?','Delete this customer?'],cDelTpl:['Padam template ini?','Delete this template?'],tpl:['template','template'],kangen:['Air Kangen','Kangen Water'],pinT:['Kunci PIN','PIN lock'],pinOld:['PIN semasa','Current PIN'],pinNew:['PIN baru (4 digit)','New PIN (4 digits)'],pinNew2:['Sahkan PIN baru','Confirm new PIN'],pinBad:['PIN salah','Wrong PIN'],pinOk:['PIN ditukar','PIN changed'],pinErr:['Semak PIN semasa dan PIN baru','Check the current and new PIN'],pinEnter:['Masukkan PIN','Enter PIN'],cloud:['Simpanan awan (cloud)','Cloud storage'],code:['Kod akses kedai','Shop access code'],syncNow:['Segerak sekarang','Sync now'],offline:['Tiada internet','No internet'],syncing:['Menyegerak...','Syncing...'],synced:['Siap disegerak','Synced'],syncErr:['Gagal segerak. Cuba lagi.','Sync failed. Try again.'],badCode:['Kod akses salah','Wrong access code'],noCode:['Masukkan kod akses untuk mula segerak','Enter the access code to start syncing'],rec:['rekod','records'],records:['Rekod','Records'],forWhat:['Bayaran untuk','Paid for'],cDelPay:['Padam rekod komisen ini?','Delete this commission record?'],stockG:['Stok aksesori','Stock accessories'],pmode:['Jenis harga','Price type'],normalP:['Harga biasa','Normal price'],agentP:['Harga Agent','Agent price'],addProd:['Tambah produk','Add product'],prod:['produk','product'],prodNote:['Harga biasa / Harga Agent','Normal price / Agent price'],needPName:['Isi nama produk','Enter the product name'],cDelProd:['Padam produk ini?','Delete this product?'],noExp:['Belum ada belanja.<br>Tekan + untuk tambah sewa atau penyelenggaraan.','No expenses yet.<br>Tap + to add rent or maintenance.'],rent:['Sewa kedai','Shop rent'],maint:['Penyelenggaraan','Maintenance'],asset:['Aset syarikat','Company assets'],assetEx:['Nama aset, contoh: laptop, meja, kerusi','Asset name, e.g. laptop, desk, chair'],cat:['Kategori','Category'],amount:['Jumlah (RM)','Amount (RM)'],expense:['belanja','expense'],totalExp:['Jumlah belanja','Total expenses'],needAmt:['Isi jumlah','Enter the amount'],cDelExp:['Padam belanja ini?','Delete this expense?'],month:['Bulan','Month'],sales:['jualan','sales'],totalComm:['Jumlah komisen','Total commission'],noWork:['Belum ada pekerja.<br>Tekan + untuk tambah pekerja.','No workers yet.<br>Tap + to add a worker.'],worker:['pekerja','worker'],ic:['No. IC','IC number'],commL:['Komisen','Commission'],other2:['Maklumat lain','Other details'],needWName:['Isi nama pekerja','Enter the worker name'],cDelWork:['Padam pekerja ini?','Delete this worker?'],
 noItems:['Belum ada item stok.<br>Tekan + untuk tambah aksesori.','No stock items yet.<br>Tap + to add an accessory.'],in:['Masuk','In'],out:['Keluar','Out'],low:['Stok rendah','Low stock'],
 edit:['Edit','Edit'],add:['Tambah','Add'],acc:['aksesori','accessory'],name:['Nama','Name'],lowLvl:['Amaran stok rendah','Low-stock alert level'],price:['Harga jual (RM)','Selling price (RM)'],opening:['Stok awal','Opening stock'],
 save:['Simpan','Save'],del:['Padam','Delete'],cancel:['Batal','Cancel'],close:['Tutup','Close'],editItem:['Edit item','Edit item'],needName:['Isi nama item','Enter the item name'],
@@ -139,7 +140,8 @@ function rStok(){
   return [...DB.items].sort((a,b)=>a.name.localeCompare(b.name)).map(it=>{
     const b=bal(it.id),low=b<=it.min;
     return `<div class="card" onclick="hist('${it.id}')"><div class="row"><div><div class="name">${esc(it.name)}</div>
-    <div class="sub">${tx('in')} ${tot(it.id,'in')} &middot; ${tx('out')} ${tot(it.id,'out')}${it.price?' &middot; '+RM(it.price):''}</div>
+    <div class="sub">${tx('in')} ${tot(it.id,'in')} &middot; ${tx('out')} ${tot(it.id,'out')}</div>
+    <div class="sub">${tx('costS')} ${it.cost?RM(it.cost):'-'} &middot; ${tx('sellS')} ${it.price?RM(it.price):'-'}</div>
     ${low?'<span class="badge">'+tx('low')+'</span>':''}</div>
     <div class="bal ${low?'low':''}">${b}<small>${esc(it.unit)}</small></div></div>
     <div class="acts" onclick="event.stopPropagation()"><button class="b p" onclick="mv('${it.id}','in')">+ ${tx('in')}</button><button class="b" onclick="mv('${it.id}','out')">- ${tx('out')}</button></div></div>`}).join('');
@@ -150,7 +152,7 @@ function itemForm(id){
   <label>${tx('name')}</label><input id="fn" value="${esc(it.name)}">
   <div class="g2"><div><label>Unit</label><input id="fu" value="${esc(it.unit||'pcs')}"></div>
   <div><label>${tx('lowLvl')}</label><input id="fm" type="number" min="0" value="${it.min||0}"></div></div>
-  <label>${tx('price')}</label><input id="fp" type="number" step="0.01" value="${it.price||''}">
+  <div class="g2"><div><label>${tx('costL')}</label><input id="fk" type="number" step="0.01" min="0" value="${it.cost||''}"></div><div><label>${tx('price')}</label><input id="fp" type="number" step="0.01" min="0" value="${it.price||''}"></div></div>
   ${id?'':'<label>'+tx('opening')+'</label><input id="fo" type="number" min="0" value="0">'}
   <div class="acts"><button class="b p" onclick="saveItem('${id}')">${tx('save')}</button>${id?`<button class="b d" onclick="delItem('${id}')">${tx('del')}</button>`:''}<button class="b" onclick="cm()">${tx('cancel')}</button></div>`);
 }
@@ -158,7 +160,7 @@ function saveItem(id){
   const n=$('#fn').value.trim();if(!n)return alert(tx('needName'));
   let it=item(id);const isNew=!it;
   if(isNew){it={id:uid()};DB.items.push(it)}
-  Object.assign(it,{name:n,unit:$('#fu').value.trim()||'pcs',min:+$('#fm').value||0,price:+$('#fp').value||0});
+  Object.assign(it,{name:n,unit:$('#fu').value.trim()||'pcs',min:+$('#fm').value||0,price:+$('#fp').value||0,cost:+$('#fk').value||0});
   if(isNew&&+$('#fo').value>0)DB.moves.push({id:uid(),itemId:it.id,type:'in',qty:+$('#fo').value,date:today(),note:'Stok awal'});
   save();cm();render();
 }
@@ -193,10 +195,17 @@ function delMv(mid,id){
 }
 
 /* ---------- JUALAN ---------- */
+const lineCost=l=>l.cost!==undefined?(l.cost||0):((l.itemId&&item(l.itemId))?(item(l.itemId).cost||0)*l.qty:0);
+const saleCost=s=>s.lines.reduce((a,l)=>a+lineCost(l),0);
 function rJual(){
-  const t=today(),sum=f=>DB.sales.filter(f).reduce((a,s)=>a+s.total,0);
-  const st=`<div class="stats"><div class="stat"><span>${tx('sToday')}</span><b>${RM(sum(s=>s.date===t))}</b></div>
-  <div class="stat"><span>${tx('sMonth')}</span><b>${RM(sum(s=>s.date.slice(0,7)===t.slice(0,7)))}</b></div></div>`;
+  const t=today(),m=t.slice(0,7),P=[s=>s.date===t,s=>s.date.slice(0,7)===m,()=>true],
+  rev=f=>DB.sales.filter(f).reduce((a,s)=>a+s.total,0),cst=f=>DB.sales.filter(f).reduce((a,s)=>a+saleCost(s),0),n=v=>RM(v).slice(3);
+  const st=`<div class="stats"><div class="stat"><span>${tx('sToday')}</span><b>${RM(rev(P[0]))}</b></div>
+  <div class="stat"><span>${tx('sMonth')}</span><b>${RM(rev(P[1]))}</b></div>
+  <div class="stat" style="grid-column:1/-1"><span>${tx('sAll')}</span><b>${RM(rev(P[2]))}</b></div></div>
+  <div class="card"><div class="name">${tx('profT')}</div><table class="pt"><tr><th></th><th>${tx('pToday')}</th><th>${tx('pMonth')}</th><th>${tx('pAll')}</th></tr>
+  <tr><td>${tx('costR')}</td>${P.map(f=>`<td>${n(cst(f))}</td>`).join('')}</tr>
+  <tr><td><b>${tx('profR')}</b></td>${P.map(f=>{const v=rev(f)-cst(f);return `<td class="${v<0?'n':'g'}">${n(v)}</td>`}).join('')}</tr></table><div class="sub" style="margin-top:8px">${tx('profNote')}</div></div>`;
   if(!DB.sales.length)return st+'<div class="empty">'+tx('noSales')+'</div>';
   return st+[...DB.sales].sort((a,b)=>b.date.localeCompare(a.date)||b.no.localeCompare(a.no)).map(s=>`<div class="card">
   <div class="row"><div><div class="name">${esc(s.customer||tx('cust'))}${s.pm==='a'?' <span class="badge in">'+tx('agentP')+'</span>':''}</div><div class="sub">${s.no} &middot; ${s.date}</div>
@@ -228,7 +237,7 @@ function pick(i,v){L[i].sel=v;const it=item(v),pr=prod(v);if(pr)L[i].price=pp(pr
 function rp(){L.forEach(l=>{const pr=prod(l.sel);if(pr)l.price=pp(pr)});sl()}
 function ut(){$('#st').textContent=tx('total')+': '+RM(L.reduce((a,l)=>a+(+l.qty||0)*(+l.price||0),0))}
 function saveSale(){
-  const ls=L.map(l=>{const it=item(l.sel),pr=prod(l.sel);return{itemId:it?it.id:null,name:it?it.name:pr?pr.name:(l.name||'').trim(),qty:+l.qty,price:+l.price||0}}).filter(l=>l.name&&l.qty>0);
+  const ls=L.map(l=>{const it=item(l.sel),pr=prod(l.sel);return{itemId:it?it.id:null,name:it?it.name:pr?pr.name:(l.name||'').trim(),qty:+l.qty,price:+l.price||0,cost:+l.qty*((it?it.cost:pr?pr.cost:0)||0)}}).filter(l=>l.name&&l.qty>0);
   if(!ls.length)return alert(tx('needLine'));
   const need={};ls.forEach(l=>{if(l.itemId)need[l.itemId]=(need[l.itemId]||0)+l.qty});
   for(const id in need)if(need[id]>bal(id))return alert(tx('noStockItem')+' '+item(id).name+' ('+tx('balL')+' '+bal(id)+')');
@@ -296,18 +305,22 @@ function saveWorker(id){
 function delWorker(id){if(!confirm(tx('cDelWork')))return;DB.workers=DB.workers.filter(x=>x.id!==id);DB.pays=DB.pays.filter(x=>x.workerId!==id);save();cm();render()}
 
 /* ---------- BELANJA (sewa & penyelenggaraan) ---------- */
+const ZS=['perniagaan','peribadi','filter'];
 function rExp(){
   EM=EM||today().slice(0,7);
   const ex=DB.expenses.filter(e=>e.date.slice(0,7)===EM),sm=c=>ex.filter(e=>e.cat===c).reduce((a,e)=>a+e.amount,0);
   const bar=`<div class="card"><label style="margin-top:0">${tx('month')}</label><input type="month" value="${EM}" onchange="EM=this.value||EM;render()"></div>
-  <div class="stats"><div class="stat"><span>${tx('rent')}</span><b>${RM(sm('rent'))}</b></div><div class="stat"><span>${tx('maint')}</span><b>${RM(sm('maint'))}</b></div><div class="stat"><span>${tx('asset')}</span><b>${RM(sm('asset'))}</b></div><div class="stat"><span>${tx('totalExp')}</span><b>${RM(sm('rent')+sm('maint')+sm('asset'))}</b></div></div>`;
+  <div class="stats"><div class="stat"><span>${tx('rent')}</span><b>${RM(sm('rent'))}</b></div><div class="stat"><span>${tx('maint')}</span><b>${RM(sm('maint'))}</b></div><div class="stat"><span>${tx('asset')}</span><b>${RM(sm('asset'))}</b></div><div class="stat"><span>${tx('zakat')}</span><b>${RM(sm('zakat'))}</b></div><div class="stat" style="grid-column:1/-1"><span>${tx('totalExp')}</span><b>${RM(sm('rent')+sm('maint')+sm('asset')+sm('zakat'))}</b></div></div>`;
+  const zk=ex.filter(e=>e.cat==='zakat'),zr=(l,v)=>`<div class="mv"><span>${l}</span><span>${RM(v)}</span></div>`,zs=a=>a.reduce((t,e)=>t+e.amount,0),
+  zb=zk.length?`<div class="card"><div class="name" style="margin-bottom:6px">${tx('zakat')}</div>${ZS.map(v=>zr(tx('z_'+v),zs(zk.filter(e=>e.sub===v)))).join('')}${zk.some(e=>!ZS.includes(e.sub))?zr(tx('z_none'),zs(zk.filter(e=>!ZS.includes(e.sub)))):''}</div>`:'';
   if(!ex.length)return bar+'<div class="empty">'+tx('noExp')+'</div>';
-  return bar+[...ex].sort((a,b)=>b.date.localeCompare(a.date)).map(e=>`<div class="card" onclick="expForm('${e.id}')"><div class="row"><div><div class="name">${e.cat==='asset'&&e.note?esc(e.note):tx(e.cat)}</div><div class="sub">${e.date}${e.cat==='asset'?' &middot; '+tx('asset'):(e.note?' &middot; '+esc(e.note):'')}</div></div><div class="bal">${RM(e.amount)}</div></div></div>`).join('');
+  return bar+zb+[...ex].sort((a,b)=>b.date.localeCompare(a.date)).map(e=>`<div class="card" onclick="expForm('${e.id}')"><div class="row"><div><div class="name">${e.cat==='asset'&&e.note?esc(e.note):tx(e.cat)+(e.cat==='zakat'&&e.sub?' &middot; '+tx('z_'+e.sub):'')}</div><div class="sub">${e.date}${e.cat==='asset'?' &middot; '+tx('asset'):(e.note?' &middot; '+esc(e.note):'')}</div></div><div class="bal">${RM(e.amount)}</div></div></div>`).join('');
 }
 function expForm(id){
   const e=DB.expenses.find(x=>x.id===id)||{};
   modal(`<h3>${id?tx('edit'):tx('add')} ${tx('expense')}</h3>
-  <label>${tx('cat')}</label><select id="xc" onchange="$('#xn').placeholder=this.value==='asset'?tx('assetEx'):''"><option value="rent"${!e.cat||e.cat==='rent'?' selected':''}>${tx('rent')}</option><option value="maint"${e.cat==='maint'?' selected':''}>${tx('maint')}</option><option value="asset"${e.cat==='asset'?' selected':''}>${tx('asset')}</option></select>
+  <label>${tx('cat')}</label><select id="xc" onchange="$('#xn').placeholder=this.value==='asset'?tx('assetEx'):'';$('#xzw').style.display=this.value==='zakat'?'block':'none'"><option value="rent"${!e.cat||e.cat==='rent'?' selected':''}>${tx('rent')}</option><option value="maint"${e.cat==='maint'?' selected':''}>${tx('maint')}</option><option value="asset"${e.cat==='asset'?' selected':''}>${tx('asset')}</option><option value="zakat"${e.cat==='zakat'?' selected':''}>${tx('zakat')}</option></select>
+  <div id="xzw" style="display:${e.cat==='zakat'?'block':'none'}"><label>${tx('zType')}</label><select id="xz">${ZS.map(v=>`<option value="${v}"${(e.sub||'perniagaan')===v?' selected':''}>${tx('z_'+v)}</option>`).join('')}</select></div>
   <div class="g2"><div><label>${tx('amount')}</label><input id="xa" type="number" min="0" step="0.01" inputmode="decimal" value="${e.amount||''}"></div>
   <div><label>${tx('date')}</label><input id="xd" type="date" value="${e.date||today()}"></div></div>
   <label>${tx('note')}</label><input id="xn" value="${esc(e.note)}" placeholder="${e.cat==='asset'?tx('assetEx'):''}">
@@ -316,7 +329,7 @@ function expForm(id){
 function saveExp(id){
   const a=+$('#xa').value;if(!(a>0))return alert(tx('needAmt'));
   let e=DB.expenses.find(x=>x.id===id);if(!e){e={id:uid()};DB.expenses.push(e)}
-  Object.assign(e,{cat:$('#xc').value,amount:a,date:$('#xd').value||today(),note:$('#xn').value.trim()});save();cm();render();
+  Object.assign(e,{cat:$('#xc').value,amount:a,date:$('#xd').value||today(),note:$('#xn').value.trim(),sub:$('#xc').value==='zakat'?$('#xz').value:''});save();cm();render();
 }
 function delExp(id){if(!confirm(tx('cDelExp')))return;DB.expenses=DB.expenses.filter(x=>x.id!==id);save();cm();render()}
 
@@ -326,12 +339,13 @@ function prodForm(id){
   modal(`<h3>${id?tx('edit'):tx('add')} ${tx('prod')}</h3><label>${tx('name')}</label><input id="pn" value="${esc(p.name)}">
   <div class="g2"><div><label>${tx('normalP')} (RM)</label><input id="pp" type="number" min="0" step="0.01" value="${v('price')}"></div>
   <div><label>${tx('agentP')} (RM)</label><input id="pa" type="number" min="0" step="0.01" value="${v('agent')}"></div></div>
+  <label>${tx('costL')}</label><input id="pc" type="number" min="0" step="0.01" value="${v('cost')}">
   <div class="acts"><button class="b p" onclick="saveProd('${id}')">${tx('save')}</button>${id?`<button class="b d" onclick="delProd('${id}')">${tx('del')}</button>`:''}<button class="b" onclick="cm()">${tx('cancel')}</button></div>`);
 }
 function saveProd(id){
   const n=$('#pn').value.trim();if(!n)return alert(tx('needPName'));
   let p=DB.products.find(x=>x.id===id);if(!p){p={id:uid()};DB.products.push(p)}
-  Object.assign(p,{name:n,price:+$('#pp').value||0,agent:+$('#pa').value||0});save();cm();render();
+  Object.assign(p,{name:n,price:+$('#pp').value||0,agent:+$('#pa').value||0,cost:+$('#pc').value||0});save();cm();render();
 }
 function delProd(id){if(!confirm(tx('cDelProd')))return;DB.products=DB.products.filter(x=>x.id!==id);save();cm();render()}
 
@@ -408,16 +422,26 @@ function saveTpl(id){
 }
 function delTpl(id){if(!confirm(tx('cDelTpl')))return;DB.templates=DB.templates.filter(x=>x.id!==id);save();tplList()}
 
+function upLogo(f){
+  if(!f)return;const r=new FileReader();
+  r.onload=()=>{const im=new Image();
+    im.onload=()=>{const k=Math.min(1,480/im.width,200/im.height),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);
+      const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.drawImage(im,0,0,c.width,c.height);
+      DB.biz.logo=c.toDataURL('image/jpeg',.88);DB.biz.lw=c.width;DB.biz.lh=c.height;save();render()};
+    im.onerror=()=>alert(tx('logoErr'));im.src=r.result};
+  r.readAsDataURL(f);
+}
+
 /* ---------- RESIT PDF (vector text, no libraries) ---------- */
 function pdf(s){
-  const W=420,M=30,R=W-M,H=Math.max(595,270+s.lines.length*15),o=[];let y=H-42;
+  const B=DB.biz,hasL=!!(B.logo&&B.lw&&B.lh),sc=hasL?Math.min(150/B.lw,54/B.lh):0,lw=B.lw*sc,lh=B.lh*sc,W=420,M=30,R=W-M,H=Math.max(595,270+s.lines.length*15)+(hasL?Math.round(lh)+14:0),o=[];let y=H-42;
   const cl=t=>String(t).replace(/[^\x20-\x7e]/g,'?').replace(/[\\()]/g,'\\$&');
-  const T=(x,yy,t,sz,b,r)=>{t=String(t);if(r)x-=t.length*sz*.53;o.push(`BT /F${b?2:1} ${sz} Tf ${x.toFixed(1)} ${yy.toFixed(1)} Td (${cl(t)}) Tj ET`)};
+  const T=(x,yy,t,sz,b,r)=>{t=String(t);if(r)x-=t.length*sz*(b?.6:.53);o.push(`BT /F${b?2:1} ${sz} Tf ${x.toFixed(1)} ${yy.toFixed(1)} Td (${cl(t)}) Tj ET`)};
   const ln=yy=>o.push(`0.6 w ${M} ${yy} m ${R} ${yy} l S`);
-  const B=DB.biz;
+  if(hasL){const yi=H-30-lh;o.push(`q ${lw.toFixed(1)} 0 0 ${lh.toFixed(1)} ${M} ${yi.toFixed(1)} cm /Im1 Do Q`);y=yi-18}
   T(M,y,B.name||'Nizam Service & Repair',16,1);y-=15;
   if(B.phone){T(M,y,'Tel: '+B.phone,9);y-=11}
-  if(B.addr){T(M,y,B.addr.slice(0,75),9);y-=11}
+  if(B.addr){(B.addr.match(/.{1,62}(\s|$)/g)||[B.addr]).slice(0,3).forEach(t=>{T(M,y,t.trim(),9);y-=11})}
   y-=6;ln(y);y-=22;
   T(M,y,tx('rcpT'),13,1);T(R,y,s.no,10,1,1);y-=15;
   T(M,y,tx('date')+': '+s.date,9);y-=12;
@@ -430,10 +454,11 @@ function pdf(s){
   T(M,y,tx('thanks'),9);
   const c=o.join('\n');
   const ob=['<</Type/Catalog/Pages 2 0 R>>','<</Type/Pages/Kids[3 0 R]/Count 1>>',
-  `<</Type/Page/Parent 2 0 R/MediaBox[0 0 ${W} ${H}]/Contents 6 0 R/Resources<</Font<</F1 4 0 R/F2 5 0 R>>>>>>`,
+  `<</Type/Page/Parent 2 0 R/MediaBox[0 0 ${W} ${H}]/Contents 6 0 R/Resources<</Font<</F1 4 0 R/F2 5 0 R>>${hasL?'/XObject<</Im1 7 0 R>>':''}>>>>`,
   '<</Type/Font/Subtype/Type1/BaseFont/Helvetica/Encoding/WinAnsiEncoding>>',
   '<</Type/Font/Subtype/Type1/BaseFont/Helvetica-Bold/Encoding/WinAnsiEncoding>>',
   `<</Length ${c.length}>>\nstream\n${c}\nendstream`];
+  if(hasL){const bin=atob(B.logo.split(',')[1]);ob.push('<</Type/XObject/Subtype/Image/Width '+B.lw+'/Height '+B.lh+'/ColorSpace/DeviceRGB/BitsPerComponent 8/Filter/DCTDecode/Length '+bin.length+'>>\nstream\n'+bin+'\nendstream')}
   let p='%PDF-1.4\n';const off=[];
   ob.forEach((x,i)=>{off.push(p.length);p+=`${i+1} 0 obj\n${x}\nendobj\n`});
   const xr=p.length;
@@ -460,6 +485,10 @@ function rLagi(){
   <label>${tx('pinNew2')}</label><input id="pn2" type="password" inputmode="numeric" maxlength="4" autocomplete="off">
   <div class="acts"><button class="b p" onclick="chgPin()">${tx('save')}</button></div></div>
   <div class="card"><div class="name">${tx('bizInfo')}</div>
+  <label>${tx('logo')}</label>
+  <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><div style="width:150px;height:62px;border:1px dashed var(--line);border-radius:10px;background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden">${DB.biz.logo?`<img src="${DB.biz.logo}" style="max-width:100%;max-height:100%">`:'<span class="sub">Logo</span>'}</div>
+  <div class="acts" style="margin:0"><button class="b p" onclick="$('#lgf').click()">${tx('upLogo')}</button>${DB.biz.logo?`<button class="b d" onclick="DB.biz.logo='';DB.biz.lw=0;DB.biz.lh=0;save();render()">${tx('rmLogo')}</button>`:''}</div></div>
+  <div class="sub">${tx('logoHint')}</div><input type="file" id="lgf" accept="image/*" style="display:none" onchange="upLogo(this.files[0]);this.value=''">
   <label>${tx('name')}</label><input value="${esc(B.name)}" oninput="DB.biz.name=this.value;save()">
   <label>${tx('phone')}</label><input value="${esc(B.phone)}" oninput="DB.biz.phone=this.value;save()">
   <label>${tx('addr')}</label><input value="${esc(B.addr)}" oninput="DB.biz.addr=this.value;save()"></div>
