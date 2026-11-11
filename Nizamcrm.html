@@ -710,6 +710,10 @@ async function pullCustomers(){
         local.source = rc.source||local.source||'manual';
         local.lastService = rc.last_service_date||''; local.recurring = rc.recurring!==false;
         local.notes = rc.notes||'';
+        // Interval used to be local-only (never sent to Supabase). Cloud value wins when
+        // present; if this device has one the cloud doesn't, queue it for push once.
+        if(rc.interval_months){ local.intervalMonths = rc.interval_months; }
+        else if(local.intervalMonths){ local._dirty = true; }
       }
     } else {
       // A brand-new row here (no local match by supabaseId or phone) is most often a
@@ -719,7 +723,8 @@ async function pullCustomers(){
         id: nextId(), code: nextCustCode(), supabaseId: rc.id, name: rc.name, phone: rc.phone||'',
         address: rc.address||'', area: rc.area||'', brand: rc.brand||'', model: rc.model||'',
         category: rc.category||'', createdAt: rc.created_at||'', source: rc.source||'manual',
-        lastService: rc.last_service_date||'', recurring: rc.recurring!==false, notes: rc.notes||''
+        lastService: rc.last_service_date||'', recurring: rc.recurring!==false, notes: rc.notes||'',
+        intervalMonths: rc.interval_months||undefined
       });
     }
   });
@@ -772,7 +777,8 @@ async function pushCustomers(){
       p_id: c.supabaseId || null, p_name: c.name, p_phone: c.phone||null,
       p_address: c.address||null, p_area: c.area||null, p_brand: c.brand||null,
       p_model: c.model||null, p_last_service_date: c.lastService||null,
-      p_recurring: c.recurring!==false, p_notes: c.notes||null
+      p_recurring: c.recurring!==false, p_notes: c.notes||null,
+      p_interval_months: c.intervalMonths||null
     });
     if(!error && data){ c.supabaseId = data; delete c._dirty; }
     else if(error){
