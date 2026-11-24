@@ -962,7 +962,7 @@ const TR = {
     'settings.bizName':'Nama perniagaan', 'settings.bizPhone':'Telefon', 'settings.bizAddress':'Alamat',
     'settings.bizPayment':'Maklumat pembayaran (bank / e-wallet)', 'settings.bizLogo':'Logo perniagaan', 'settings.bizLogoRemove':'Buang logo',
     'settings.bizQr':'Kod QR pembayaran (pilihan)', 'settings.bizQrRemove':'Buang kod QR', 'settings.imgTooLarge':'Fail terlalu besar. Sila muat naik imej di bawah {max}.',
-    'job.generateInvoice':'Jana invois', 'inv.title':'INVOIS', 'inv.no':'No. Invois', 'inv.date':'Tarikh',
+    'job.generateInvoice':'Jana invois', 'inv.title':'RESIT RASMI', 'inv.no':'No. Resit', 'inv.date':'Tarikh',
     'inv.billTo':'Bil kepada', 'inv.desc':'Perkara', 'inv.amount':'Jumlah', 'inv.total':'Jumlah Keseluruhan',
     'inv.serviceLine':'Servis & pembaikan', 'inv.thankyou':'Terima kasih atas perniagaan anda.',
     'inv.paymentInfo':'Maklumat pembayaran', 'inv.qrScan':'Imbas untuk bayar', 'inv.sendWhatsapp':'Hantar melalui WhatsApp', 'inv.downloaded':'Invois telah dimuat turun ke peranti anda.', 'inv.genError':'Gagal jana invois. Sila cuba lagi.', 'inv.noPhoneForShare':'Tiada nombor telefon pelanggan untuk berkongsi.', 'inv.attachReminder':'(Fail PDF invois telah dimuat turun — sila lampirkan secara manual jika perlu.)'
@@ -1011,7 +1011,7 @@ const TR = {
     'settings.bizName':'Business name', 'settings.bizPhone':'Phone', 'settings.bizAddress':'Address',
     'settings.bizPayment':'Payment info (bank / e-wallet)', 'settings.bizLogo':'Business logo', 'settings.bizLogoRemove':'Remove logo',
     'settings.bizQr':'Payment QR code (optional)', 'settings.bizQrRemove':'Remove QR code', 'settings.imgTooLarge':'File too large. Please upload an image under {max}.',
-    'job.generateInvoice':'Generate invoice', 'inv.title':'INVOICE', 'inv.no':'Invoice No.', 'inv.date':'Date',
+    'job.generateInvoice':'Generate invoice', 'inv.title':'OFFICIAL RECEIPT', 'inv.no':'Receipt No.', 'inv.date':'Date',
     'inv.billTo':'Bill To', 'inv.desc':'Description', 'inv.amount':'Amount', 'inv.total':'Total',
     'inv.serviceLine':'Service & repair', 'inv.thankyou':'Thank you for your business.',
     'inv.paymentInfo':'Payment info', 'inv.qrScan':'Scan to pay', 'inv.sendWhatsapp':'Send via WhatsApp', 'inv.downloaded':'Invoice downloaded to your device.', 'inv.genError':'Failed to generate invoice. Please try again.', 'inv.noPhoneForShare':'No customer phone number to share with.', 'inv.attachReminder':'(Invoice PDF was downloaded — please attach it manually if needed.)'
@@ -1704,7 +1704,7 @@ function renderInvoicePNG(j, c, biz){
     let by = PAD + 42;
     bizDetailLines.forEach(function(line){ drawText(line, headerLeftX, by, {size:13, color:'#555555'}); by += 17; });
 
-    drawText(t('inv.title'), W - PAD, PAD + 24, {size:26, bold:true, serif:true, color:'#0E4F4A', align:'right'});
+    drawText(t('inv.title'), W - PAD, PAD + 24, {size:22, bold:true, serif:true, color:'#0E4F4A', align:'right'});
     drawText(t('inv.no')+': '+j.invoiceNo, W-PAD, PAD+44, {size:12, color:'#555555', align:'right'});
     drawText(t('inv.date')+': '+fmtDate(j.date), W-PAD, PAD+60, {size:12, color:'#555555', align:'right'});
 
