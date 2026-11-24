@@ -524,6 +524,8 @@
     <div class="card">
       <div class="name" data-t="settings.businessTitle"></div>
       <div class="sub" data-t="settings.businessDesc"></div>
+      <label data-t="settings.docType"></label>
+      <select id="bizDocType"><option value="invoice" data-t="settings.docTypeInvoice"></option><option value="receipt" data-t="settings.docTypeReceipt"></option></select>
       <label data-t="settings.bizLogo"></label>
       <div class="logo-row">
         <div class="logo-preview" id="bizLogoPreview"></div>
@@ -962,7 +964,7 @@ const TR = {
     'settings.bizName':'Nama perniagaan', 'settings.bizPhone':'Telefon', 'settings.bizAddress':'Alamat',
     'settings.bizPayment':'Maklumat pembayaran (bank / e-wallet)', 'settings.bizLogo':'Logo perniagaan', 'settings.bizLogoRemove':'Buang logo',
     'settings.bizQr':'Kod QR pembayaran (pilihan)', 'settings.bizQrRemove':'Buang kod QR', 'settings.imgTooLarge':'Fail terlalu besar. Sila muat naik imej di bawah {max}.',
-    'job.generateInvoice':'Jana invois', 'inv.title':'RESIT RASMI', 'inv.no':'No. Resit', 'inv.date':'Tarikh',
+    'job.generateInvoice':'Jana invois', 'inv.title':'INVOIS', 'inv.no':'No. Invois', 'inv.titleReceipt':'RESIT RASMI', 'inv.noReceipt':'No. Resit', 'settings.docType':'Nama dokumen', 'settings.docTypeInvoice':'Invois', 'settings.docTypeReceipt':'Resit rasmi', 'inv.date':'Tarikh',
     'inv.billTo':'Bil kepada', 'inv.desc':'Perkara', 'inv.amount':'Jumlah', 'inv.total':'Jumlah Keseluruhan',
     'inv.serviceLine':'Servis & pembaikan', 'inv.thankyou':'Terima kasih atas perniagaan anda.',
     'inv.paymentInfo':'Maklumat pembayaran', 'inv.qrScan':'Imbas untuk bayar', 'inv.sendWhatsapp':'Hantar melalui WhatsApp', 'inv.downloaded':'Invois telah dimuat turun ke peranti anda.', 'inv.genError':'Gagal jana invois. Sila cuba lagi.', 'inv.noPhoneForShare':'Tiada nombor telefon pelanggan untuk berkongsi.', 'inv.attachReminder':'(Fail PDF invois telah dimuat turun — sila lampirkan secara manual jika perlu.)'
@@ -1011,7 +1013,7 @@ const TR = {
     'settings.bizName':'Business name', 'settings.bizPhone':'Phone', 'settings.bizAddress':'Address',
     'settings.bizPayment':'Payment info (bank / e-wallet)', 'settings.bizLogo':'Business logo', 'settings.bizLogoRemove':'Remove logo',
     'settings.bizQr':'Payment QR code (optional)', 'settings.bizQrRemove':'Remove QR code', 'settings.imgTooLarge':'File too large. Please upload an image under {max}.',
-    'job.generateInvoice':'Generate invoice', 'inv.title':'OFFICIAL RECEIPT', 'inv.no':'Receipt No.', 'inv.date':'Date',
+    'job.generateInvoice':'Generate invoice', 'inv.title':'INVOICE', 'inv.no':'Invoice No.', 'inv.titleReceipt':'OFFICIAL RECEIPT', 'inv.noReceipt':'Receipt No.', 'settings.docType':'Document name', 'settings.docTypeInvoice':'Invoice', 'settings.docTypeReceipt':'Official receipt', 'inv.date':'Date',
     'inv.billTo':'Bill To', 'inv.desc':'Description', 'inv.amount':'Amount', 'inv.total':'Total',
     'inv.serviceLine':'Service & repair', 'inv.thankyou':'Thank you for your business.',
     'inv.paymentInfo':'Payment info', 'inv.qrScan':'Scan to pay', 'inv.sendWhatsapp':'Send via WhatsApp', 'inv.downloaded':'Invoice downloaded to your device.', 'inv.genError':'Failed to generate invoice. Please try again.', 'inv.noPhoneForShare':'No customer phone number to share with.', 'inv.attachReminder':'(Invoice PDF was downloaded — please attach it manually if needed.)'
@@ -1704,8 +1706,8 @@ function renderInvoicePNG(j, c, biz){
     let by = PAD + 42;
     bizDetailLines.forEach(function(line){ drawText(line, headerLeftX, by, {size:13, color:'#555555'}); by += 17; });
 
-    drawText(t('inv.title'), W - PAD, PAD + 24, {size:22, bold:true, serif:true, color:'#0E4F4A', align:'right'});
-    drawText(t('inv.no')+': '+j.invoiceNo, W-PAD, PAD+44, {size:12, color:'#555555', align:'right'});
+    drawText(docTitle(), W - PAD, PAD + 24, {size:22, bold:true, serif:true, color:'#0E4F4A', align:'right'});
+    drawText(docNoLabel()+': '+j.invoiceNo, W-PAD, PAD+44, {size:12, color:'#555555', align:'right'});
     drawText(t('inv.date')+': '+fmtDate(j.date), W-PAD, PAD+60, {size:12, color:'#555555', align:'right'});
 
     let headerBottom = Math.max(by, PAD + 66) + 14;
@@ -1936,7 +1938,7 @@ function triggerDownload(blob, filename){
   setTimeout(function(){ URL.revokeObjectURL(url); }, 4000);
 }
 function showInvoiceResultModal(previewDataUrl, pdfBlob, j, c, biz){
-  let html = '<h2>' + t('inv.title') + ' ' + j.invoiceNo + '</h2>';
+  let html = '<h2>' + docTitle() + ' ' + j.invoiceNo + '</h2>';
   html += '<div class="sub" style="margin-bottom:10px;">' + t('inv.downloaded') + '</div>';
   html += '<div style="text-align:center;margin-bottom:12px;"><img src="' + previewDataUrl + '" style="max-width:100%;border:1px solid var(--line);border-radius:8px;"></div>';
   html += '<div class="footer-actions"><button class="btn btn-whatsapp btn-block" id="invShareBtn">' + ICON.whatsapp + ' ' + t('inv.sendWhatsapp') + '</button></div>';
@@ -1948,14 +1950,14 @@ function shareInvoicePDF(pdfBlob, j, c, biz){
   if(navigator.share && navigator.canShare){
     const file = new File([pdfBlob], filename, {type:'application/pdf'});
     if(navigator.canShare({files:[file]})){
-      navigator.share({files:[file], title: t('inv.title')+' '+j.invoiceNo}).catch(function(){});
+      navigator.share({files:[file], title: docTitle()+' '+j.invoiceNo}).catch(function(){});
       return;
     }
   }
   const waPhone = c && c.phone ? c.phone.replace(/[^0-9]/g,'') : '';
   if(!waPhone){ alert(t('inv.noPhoneForShare')); return; }
   const serviceDescPlain = t('inv.serviceLine') + (c && c.brand ? ' — ' + c.brand + (c.model?' ('+c.model+')':'') : '');
-  const waMsg = t('inv.title') + ' ' + j.invoiceNo + '\n' +
+  const waMsg = docTitle() + ' ' + j.invoiceNo + '\n' +
     (biz.name||'Nizam Service & Repair') + '\n\n' +
     t('inv.billTo') + ': ' + (c?c.name:'—') + '\n' +
     t('inv.date') + ': ' + fmtDate(j.date) + '\n' +
@@ -2172,6 +2174,9 @@ function renderFinancialReport(){
 }
 
 /* ---------- SETTINGS ---------- */
+function isReceiptMode(){ return !!(DB.settings && DB.settings.docType==='receipt'); }
+function docTitle(){ return isReceiptMode() ? t('inv.titleReceipt') : t('inv.title'); }
+function docNoLabel(){ return isReceiptMode() ? t('inv.noReceipt') : t('inv.no'); }
 function saveInterval(){
   DB.settings.intervalMonths = parseInt(document.getElementById('defaultInterval').value) || 3;
   save(); renderAll();
@@ -2182,6 +2187,7 @@ function saveBusiness(){
   DB.settings.business.phone = document.getElementById('bizPhone').value.trim();
   DB.settings.business.address = document.getElementById('bizAddress').value.trim();
   DB.settings.business.payment = document.getElementById('bizPayment').value.trim();
+  DB.settings.docType = document.getElementById('bizDocType').value==='receipt' ? 'receipt' : 'invoice';
   save();
   alert(t('settings.saved'));
 }
@@ -2282,6 +2288,7 @@ function renderAll(){
   document.getElementById('bizPhone').value = biz.phone||'';
   document.getElementById('bizAddress').value = biz.address||'';
   document.getElementById('bizPayment').value = biz.payment||'';
+  document.getElementById('bizDocType').value = isReceiptMode() ? 'receipt' : 'invoice';
   renderLogoPreview();
   renderQrPreview();
 }
